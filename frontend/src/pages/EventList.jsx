@@ -1,51 +1,53 @@
-import React, { useEffect, useState } from "react";
-import API from "../services/api.js";
-import { Link } from "react-router-dom";
+import React from "react";
+import Container from "../components/Container";
+import Card from "../components/Card";
+import Button from "../components/Button";
+import { useNavigate } from "react-router-dom";
+import { useEvents } from "../hooks/useEvents";
+import LoadingSkeleton from "../components/LoadingSkeleton";
 
-const EventList = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function EventsList() {
+  const nav = useNavigate();
+  const { data: events, isLoading, isError } = useEvents();
 
-  useEffect(() => {
-    const getEvents = async () => {
-      try {
-        const res = await API.get("/events");
-        setEvents(res.data);
-      } catch (err) {
-        console.error("Error loading events:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  if (isLoading) {
+    return (
+      <Container className="py-12">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <LoadingSkeleton />
+          <LoadingSkeleton />
+          <LoadingSkeleton />
+        </div>
+      </Container>
+    );
+  }
 
-    getEvents();
-  }, []);
-
-  if (loading) return <p className="text-center mt-8">Loading events...</p>;
-  if (!events.length) return <p className="text-center mt-8">No events found.</p>;
+  if (isError) {
+    return <Container className="py-20 text-center">Unable to load events. Try again later.</Container>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 grid md:grid-cols-2 gap-4">
-      {events.map((ev) => (
-        <div key={ev._id} className="p-4 border rounded bg-white shadow">
-          <h3 className="font-bold text-lg">{ev.title}</h3>
-          <p className="text-sm text-gray-600">
-            {ev.location} • {new Date(ev.date).toLocaleDateString()}
-          </p>
-          <p className="mt-2 text-gray-700">{ev.description?.slice(0, 120)}...</p>
+    <Container className="py-12">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Upcoming events</h2>
+        <Button onClick={() => nav("/admin/create-event")}>Create event</Button>
+      </div>
 
-          <div className="mt-3 flex gap-2">
-            <Link
-              to={`/events/${ev._id}`}
-              className="text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
-            >
-              View
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {events?.map(ev => (
+          <Card key={ev._id} className="flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">{ev.title}</h3>
+              <p className="text-sm text-gray-500">{new Date(ev.startAt).toLocaleString()}</p>
+              <p className="mt-2 text-sm text-gray-700 line-clamp-3">{ev.description}</p>
+            </div>
+            <div className="mt-4 flex items-center justify-between">
+              <Button onClick={() => nav(`/events/${ev._id}`)} variant="ghost">View</Button>
+              <div className="text-xs text-gray-400">ID #{String(ev._id).slice(0,6)}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </Container>
   );
-};
-
-export default EventList;
+}
