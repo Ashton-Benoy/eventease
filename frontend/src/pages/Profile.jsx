@@ -1,165 +1,150 @@
 import React, { useEffect, useState } from "react";
-import API from "../api";
+import API from "../services/api.js";
+import { useNavigate } from "react-router-dom";
 
-const ProfilePage = () => {
+const Profile = () => {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [rsvpList, setRsvpList] = useState([]);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "" });
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
 
-  const [password, setPassword] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-
+  // Load from local storage first (instant display)
   useEffect(() => {
+    const u = localStorage.getItem("user");
+    if (u) {
+      const parsed = JSON.parse(u);
+      setUser(parsed);
+      setForm({ name: parsed.name, email: parsed.email });
+    }
     fetchProfile();
-    fetchMyEvents();
-    fetchMyRSVPs();
   }, []);
 
+  // Fetch real profile from backend
   const fetchProfile = async () => {
     try {
+      setLoading(true);
       const res = await API.get("/auth/me");
-      setUser(res.data);
-      setName(res.data.name);
-      setEmail(res.data.email);
-    } catch (err) {
-      setErrorMsg("Failed to fetch user profile");
-    }
-  };
-
-  const fetchMyEvents = async () => {
-    try {
-      const res = await API.get("/events/my-events");
-      setEvents(res.data);
-    } catch (err) {
-      console.log("Events not loaded");
-    }
-  };
-
-  const fetchMyRSVPs = async () => {
-    try {
-      const res = await API.get("/events/my-rsvp");
-      setRsvpList(res.data);
-    } catch (err) {
-      console.log("RSVP data not loaded");
-    }
-  };
-
-  const updateProfile = async (e) => {
-    e.preventDefault();
-    setSuccessMsg("");
-    setErrorMsg("");
-
-    try {
-      const res = await API.put("/auth/update", {
-        name,
-        email,
-        password: password || undefined,
+      setUser(res.data.user);
+      setForm({
+        name: res.data.user.name,
+        email: res.data.user.email,
       });
-
-      setSuccessMsg("Profile updated successfully!");
-      setPassword("");
-      fetchProfile();
+      localStorage.setItem("user", JSON.stringify(res.data.user));
     } catch (err) {
-      setErrorMsg("Profile update failed");
+      console.error(err);
+      setMsg("Failed to fetch profile.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!user) {
-    return <p className="text-center mt-10">Loading...</p>;
-  }
+  // Update profile
+  const updateProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await API.put("/auth/update-profile", form);
+
+      setMsg("Profile updated successfully!");
+      setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      setEditing(false);
+    } catch (err) {
+      setMsg(err.response?.data?.message || "Update failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  if (!user) return <p className="text-center mt-10">Loading profile...</p>;
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6">
-      <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+    <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-8">
+      <h2 className="text-2xl font-bold mb-4">My Profile</h2>
 
-      {/* Messages */}
-      {successMsg && <p className="text-green-600 font-semibold">{successMsg}</p>}
-      {errorMsg && <p className="text-red-500 font-semibold">{errorMsg}</p>}
+      {msg && <p className="p-2 bg-blue-100 text-blue-700 rounded mb-3">{msg}</p>}
 
-      <div className="grid md:grid-cols-2 gap-10">
-
-        {/* --- Profile Update Form --- */}
-        <div className="bg-white shadow p-6 rounded">
-          <h2 className="text-xl font-semibold mb-4">Account Details</h2>
-
-          <form onSubmit={updateProfile}>
-            <label className="block font-semibold">Name</label>
-            <input
-              className="w-full border p-2 rounded mb-4"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-
-            <label className="block font-semibold">Email</label>
-            <input
-              className="w-full border p-2 rounded mb-4"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <label className="block font-semibold">New Password (optional)</label>
-            <input
-              className="w-full border p-2 rounded mb-6"
-              type="password"
-              placeholder="Change password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-              Update Profile
-            </button>
-          </form>
-        </div>
-
-        {/* --- Right Side: Events + RSVPs --- */}
+      {/* VIEW MODE */}
+      {!editing && (
         <div>
-          {/* User's created events */}
-          <div className="bg-white shadow p-6 rounded mb-8">
-            <h2 className="text-xl font-semibold mb-3">My Created Events</h2>
-            {events.length === 0 ? (
-              <p className="text-gray-500">No events created yet.</p>
-            ) : (
-              <ul className="list-disc ml-5">
-                {events.map((event) => (
-                  <li key={event._id} className="mb-1">
-                    <a
-                      className="text-blue-600 hover:underline"
-                      href={`/events/${event._id}`}
-                    >
-                      {event.title}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <p className="mb-2">
+            <strong>Name:</strong> {user.name}
+          </p>
+          <p className="mb-2">
+            <strong>Email:</strong> {user.email}
+          </p>
+
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={() => setEditing(true)}
+              className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+            >
+              Edit Profile
+            </button>
+
+            <button
+              onClick={logout}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Logout
+            </button>
           </div>
 
-          {/* User's RSVPs */}
-          <div className="bg-white shadow p-6 rounded">
-            <h2 className="text-xl font-semibold mb-3">My RSVPs</h2>
-            {rsvpList.length === 0 ? (
-              <p className="text-gray-500">No RSVP activity.</p>
-            ) : (
-              <ul className="list-disc ml-5">
-                {rsvpList.map((r) => (
-                  <li key={r._id} className="mb-1">
-                    <strong>{r.eventTitle}</strong>:{" "}
-                    <span className="text-blue-600">{r.response}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <button
+            onClick={fetchProfile}
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Refresh
+          </button>
+        </div>
+      )}
+
+      {/* EDIT MODE */}
+      {editing && (
+        <div>
+          <input
+            className="w-full p-2 border rounded mb-2"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Name"
+          />
+          <input
+            className="w-full p-2 border rounded mb-2"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            placeholder="Email"
+          />
+
+          <div className="mt-3 flex gap-3">
+            <button
+              onClick={updateProfile}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Save
+            </button>
+
+            <button
+              onClick={() => setEditing(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 };
 
-export default ProfilePage;
+export default Profile;

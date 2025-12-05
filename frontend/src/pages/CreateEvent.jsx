@@ -1,121 +1,117 @@
 import React, { useState } from "react";
-import API from "../api/api";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api.js";
 
 const CreateEvent = () => {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     title: "",
     description: "",
-    date: "",
-    time: "",
     location: "",
-    capacity: "",
+    date: "",
+    price: "",
+    seats: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
+    setLoading(true);
 
     try {
-      await API.post("/events", formData);
+      const res = await API.post("/events", form);
+
       alert("Event created successfully!");
       navigate("/events");
     } catch (err) {
       console.log(err);
-      alert("Failed to create event");
+      setErrorMsg(err.response?.data?.message || "Event creation failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
-      <div className="max-w-xl mx-auto bg-white shadow p-6 rounded-xl">
-        <h1 className="text-3xl font-bold mb-4">Create Event</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded shadow mt-8">
+      <h2 className="text-2xl font-bold mb-4">Create New Event</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {errorMsg && (
+        <p className="bg-red-100 text-red-700 p-2 rounded mb-3">{errorMsg}</p>
+      )}
 
-          {/* Title */}
-          <div>
-            <label className="font-semibold">Event Title</label>
-            <input
-              type="text"
-              name="title"
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+      <form onSubmit={handleSubmit}>
+        <input
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          placeholder="Event Title"
+          className="w-full p-2 border rounded mb-3"
+          required
+        />
 
-          {/* Description */}
-          <div>
-            <label className="font-semibold">Description</label>
-            <textarea
-              name="description"
-              className="w-full border p-2 rounded"
-              rows="3"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          placeholder="Event Description"
+          className="w-full p-2 border rounded mb-3"
+          required
+        />
 
-          {/* Date */}
-          <div>
-            <label className="font-semibold">Date</label>
-            <input
-              type="date"
-              name="date"
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <input
+          name="location"
+          value={form.location}
+          onChange={handleChange}
+          placeholder="Location"
+          className="w-full p-2 border rounded mb-3"
+          required
+        />
 
-          {/* Time */}
-          <div>
-            <label className="font-semibold">Time</label>
-            <input
-              type="time"
-              name="time"
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <input
+          name="date"
+          type="date"
+          value={form.date}
+          onChange={handleChange}
+          className="w-full p-2 border rounded mb-3"
+          required
+        />
 
-          {/* Location */}
-          <div>
-            <label className="font-semibold">Location</label>
-            <input
-              type="text"
-              name="location"
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className="flex gap-4">
+          <input
+            name="price"
+            type="number"
+            value={form.price}
+            onChange={handleChange}
+            placeholder="Ticket Price"
+            className="w-1/2 p-2 border rounded mb-3"
+          />
 
-          {/* Capacity */}
-          <div>
-            <label className="font-semibold">Capacity</label>
-            <input
-              type="number"
-              name="capacity"
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <input
+            name="seats"
+            type="number"
+            value={form.seats}
+            onChange={handleChange}
+            placeholder="Available Seats"
+            className="w-1/2 p-2 border rounded mb-3"
+          />
+        </div>
 
-          {/* Submit */}
-          <button className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
-            Create Event
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
+        >
+          {loading ? "Creating..." : "Create Event"}
+        </button>
+      </form>
     </div>
   );
 };

@@ -1,149 +1,138 @@
 import React, { useEffect, useState } from "react";
-import API from "../api/api";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 const EditEvent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     title: "",
     description: "",
-    date: "",
-    time: "",
     location: "",
-    capacity: "",
+    date: "",
+    price: 0,
+    seats: 0,
   });
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
 
-  // Fetch event details
+  // Load event data
   useEffect(() => {
-    const fetchEvent = async () => {
+    const getEvent = async () => {
       try {
         const res = await API.get(`/events/${id}`);
-        setFormData(res.data);
+        const ev = res.data;
+
+        setForm({
+          title: ev.title,
+          description: ev.description,
+          location: ev.location,
+          date: ev.date?.substring(0, 10), // fix date for input
+          price: ev.price,
+          seats: ev.seats,
+        });
+      } catch (err) {
+        console.error(err);
+        setMsg("Failed to load event");
+      } finally {
         setLoading(false);
-      } catch (error) {
-        console.log(error);
-        alert("Error loading event");
       }
     };
 
-    fetchEvent();
+    getEvent();
   }, [id]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Submit updated data
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
 
     try {
-      await API.put(`/events/${id}`, formData);
-      alert("Event updated successfully!");
-      navigate("/events");
+      await API.put(`/events/${id}`, form);
+      setMsg("Event updated successfully!");
+      setTimeout(() => navigate(`/events/${id}`), 1000);
     } catch (err) {
-      console.log(err);
-      alert("Failed to update event");
+      setMsg(err.response?.data?.message || "Update failed");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <p className="text-center mt-6">Loading...</p>;
+  if (loading) return <p className="text-center mt-10">Loading event...</p>;
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
-      <div className="max-w-xl mx-auto bg-white shadow p-6 rounded-xl">
-        <h1 className="text-3xl font-bold mb-4">Edit Event</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded shadow mt-6">
+      <h2 className="text-2xl font-bold mb-4">Edit Event</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {msg && (
+        <p className="mb-3 p-2 bg-blue-100 text-blue-700 rounded">{msg}</p>
+      )}
 
-          {/* Title */}
-          <div>
-            <label className="font-semibold">Event Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+      <form onSubmit={handleSubmit}>
+        <input
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          placeholder="Title"
+          className="w-full p-2 border rounded mb-3"
+          required
+        />
 
-          {/* Description */}
-          <div>
-            <label className="font-semibold">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              className="w-full border p-2 rounded"
-              rows="3"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <input
+          name="location"
+          value={form.location}
+          onChange={handleChange}
+          placeholder="Location"
+          className="w-full p-2 border rounded mb-3"
+        />
 
-          {/* Date */}
-          <div>
-            <label className="font-semibold">Date</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date?.substring(0, 10)}
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <input
+          name="date"
+          type="date"
+          value={form.date}
+          onChange={handleChange}
+          className="w-full p-2 border rounded mb-3"
+        />
 
-          {/* Time */}
-          <div>
-            <label className="font-semibold">Time</label>
-            <input
-              type="time"
-              name="time"
-              value={formData.time}
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          placeholder="Description"
+          className="w-full p-2 border rounded mb-3"
+        />
 
-          {/* Location */}
-          <div>
-            <label className="font-semibold">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className="flex gap-3">
+          <input
+            name="price"
+            type="number"
+            value={form.price}
+            onChange={handleChange}
+            placeholder="Price"
+            className="w-1/2 p-2 border rounded mb-3"
+          />
+          <input
+            name="seats"
+            type="number"
+            value={form.seats}
+            onChange={handleChange}
+            placeholder="Seats"
+            className="w-1/2 p-2 border rounded mb-3"
+          />
+        </div>
 
-          {/* Capacity */}
-          <div>
-            <label className="font-semibold">Capacity</label>
-            <input
-              type="number"
-              name="capacity"
-              value={formData.capacity}
-              className="w-full border p-2 rounded"
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Submit */}
-          <button className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
-            Save Changes
-          </button>
-        </form>
-      </div>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          disabled={saving}
+        >
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </form>
     </div>
   );
 };

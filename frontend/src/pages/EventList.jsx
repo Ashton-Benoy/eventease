@@ -1,88 +1,51 @@
 import React, { useEffect, useState } from "react";
-import API from "../api/api";
+import API from "../services/api.js";
 import { Link } from "react-router-dom";
-
 
 const EventList = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch events on load
-  const fetchEvents = async () => {
-    try {
-      const res = await API.get("/events");
-      setEvents(res.data.events || []);
-    } catch (err) {
-      console.error("Error fetching events:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchEvents();
+    const getEvents = async () => {
+      try {
+        const res = await API.get("/events");
+        setEvents(res.data);
+      } catch (err) {
+        console.error("Error loading events:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getEvents();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-lg">
-        Loading events...
-      </div>
-    );
-  }
+  if (loading) return <p className="text-center mt-8">Loading events...</p>;
+  if (!events.length) return <p className="text-center mt-8">No events found.</p>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Upcoming Events</h1>
+    <div className="max-w-4xl mx-auto p-4 grid md:grid-cols-2 gap-4">
+      {events.map((ev) => (
+        <div key={ev._id} className="p-4 border rounded bg-white shadow">
+          <h3 className="font-bold text-lg">{ev.title}</h3>
+          <p className="text-sm text-gray-600">
+            {ev.location} • {new Date(ev.date).toLocaleDateString()}
+          </p>
+          <p className="mt-2 text-gray-700">{ev.description?.slice(0, 120)}...</p>
 
-        <Link
-          to="/create-event"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          + Create Event
-        </Link>
-      </div>
-
-      {/* If no events */}
-      {events.length === 0 && (
-        <p className="text-gray-600 text-lg text-center mt-20">
-          No events found. Create one!
-        </p>
-      )}
-
-      {/* Event Cards Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event) => (
-          <div
-            key={event._id}
-            className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition"
-          >
-            <h2 className="text-2xl font-semibold mb-2">{event.title}</h2>
-            <p className="text-gray-600 mb-2">{event.description}</p>
-
-            <p className="text-gray-500 text-sm">
-              📅 Date: {new Date(event.date).toLocaleDateString()}
-            </p>
-
-            <p className="text-gray-500 text-sm">📍 Venue: {event.location}</p>
-
+          <div className="mt-3 flex gap-2">
             <Link
-              to={`/events/${event._id}`}
-              className="mt-4 block px-4 py-2 bg-blue-500 text-white text-center rounded-lg hover:bg-blue-600"
+              to={`/events/${ev._id}`}
+              className="text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700"
             >
-              View Details
+              View
             </Link>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
 
 export default EventList;
-<Link to="/events/create">
-  <button className="bg-green-600 text-white px-4 py-2 rounded-lg">
-    + Create Event
-  </button>
-</Link>

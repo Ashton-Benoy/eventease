@@ -1,59 +1,31 @@
 import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import API from "../services/api.js";
 
 const Login = () => {
-  const { login } = useAuth();
-
+  const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
 
-  const handleLogin = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-
-    const response = await login(email, password);
-
-    if (response.success) {
-      setMessage("Login successful! Redirecting...");
-      window.location.href = "/"; // go to home OR dashboard
-    } else {
-      setMessage(response.message || "Login failed");
+    try {
+      const res = await API.post("/auth/login", { email, password });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      nav("/");
+    } catch (err) {
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 bg-white p-8 shadow-xl rounded">
-      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-
-      {message && (
-        <p className="text-center mb-4 text-red-600 font-semibold">{message}</p>
-      )}
-
-      <form onSubmit={handleLogin}>
-        <label className="block mb-2 font-semibold">Email</label>
-        <input
-          type="email"
-          className="w-full p-3 border rounded mb-4"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <label className="block mb-2 font-semibold">Password</label>
-        <input
-          type="password"
-          className="w-full p-3 border rounded mb-6"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
-        >
-          Login
-        </button>
+    <div className="max-w-md mx-auto p-6 bg-white rounded">
+      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <form onSubmit={submit}>
+        <input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" type="email" className="w-full p-2 border mb-2" required />
+        <input value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Password" type="password" className="w-full p-2 border mb-4" required />
+        <button className="bg-blue-600 text-white px-4 py-2 rounded">Login</button>
       </form>
     </div>
   );
