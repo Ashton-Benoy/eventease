@@ -1,86 +1,27 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-
-import ProtectedRoute from "./components/ProtectedRoute";
-
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import EventList from "./pages/EventList";
-import EventDetails from "./pages/EventDetails";
-import CreateEvent from "./pages/CreateEvent";
-import EditEvent from "./pages/EditEvent";
-import Profile from "./pages/Profile";
+import React from "react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Dashboard from "./pages/Dashboard";
 import RSVPPage from "./pages/RSVPPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import SearchEvents from "./pages/SearchEvents";
+import Home from "./pages/Home";
+import Features from "./pages/Features";
+import FeatureDetail from "./pages/FeatureDetail";
+import { Routes, Route } from "react-router-dom";
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-
-      <div className="pt-16"> {/* Prevent overlap with navbar */}
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 py-10">
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/events" element={<EventList />} />
-          <Route path="/events/:id" element={<EventDetails />} />
-          <Route path="/search" element={<SearchEvents />} />
-
-          {/* Protected Routes */}
-          <Route
-            path="/create-event"
-            element={
-              <ProtectedRoute>
-                <CreateEvent />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/edit/:id"
-            element={
-              <ProtectedRoute>
-                <EditEvent />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Admin only */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* RSVP */}
-          <Route
-            path="/rsvp/:id"
-            element={
-              <ProtectedRoute>
-                <RSVPPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/rsvp/:id" element={<RSVPPage />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/features/:slug" element={<FeatureDetail />} />
         </Routes>
-      </div>
-    </BrowserRouter>
+      </main>
+      <Footer />
+    </div>
   );
 }
-
-export default App;
