@@ -1,34 +1,41 @@
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cors from "cors";
-import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
 
-dotenv.config();
 const app = express();
 
-app.use(cors());
+
+app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:5173" }));
 app.use(express.json());
 
 
-app.get("/", (req, res) => res.send("EventEase API running"));
+const PORT = process.env.PORT || 5000;
 
-
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-
-
-const start = async () => {
+async function startServer() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ MongoDB connected successfully");
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    const mongoUrl = process.env.MONGODB_URL || process.env.MONGO_URL;
+    if (!mongoUrl) throw new Error("MONGODB_URL is not set in .env");
+
+
+    await mongoose.connect(mongoUrl);
+    console.log("MongoDB connected");
+
+
+    app.use("/api/events", require(path.join(__dirname, "routes", "eventRoutes")));
+
+
+
+    app.get("/api/health", (req, res) => res.json({ ok: true }));
+
+    app.listen(PORT, () => {
+      console.log(`Server listening on ${PORT}`);
+    });
   } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("Failed to start server:", err);
     process.exit(1);
   }
-};
+}
 
-start();
+startServer();
