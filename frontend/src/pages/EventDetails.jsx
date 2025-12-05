@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api.js";
+import { loadStripe } from '@stripe/stripe-js';
 
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -91,6 +92,7 @@ const EventDetails = () => {
           >
             Delete
           </button>
+          
         )}
       </div>
     </div>

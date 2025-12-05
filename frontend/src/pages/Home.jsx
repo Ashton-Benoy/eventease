@@ -1,13 +1,22 @@
-import React from "react";
-import EventList from "./EventList";
+import Container from "../components/Container";
+import Button from "../components/Button";
 
-const Home = () => {
+export default function Home() {
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Welcome to EventEase</h1>
-      <EventList />
-    </div>
+    <Container>
+      <div className="grid gap-8 sm:grid-cols-2 items-center">
+        <div>
+          <h1 className="text-4xl font-extrabold mb-4">Manage events. Make memories.</h1>
+          <p className="text-gray-600 mb-6">Create events, invite guests, and track RSVPs — all in one place.</p>
+          <Button>Get Started</Button>
+        </div>
+        <div>
+          <div className="bg-gradient-to-br from-primary to-indigo-400 rounded-lg text-white p-8">
+            <h3 className="text-xl font-semibold">Live preview</h3>
+            <p className="mt-2 text-sm">Responsive dashboard, RSVP flows and more.</p>
+          </div>
+        </div>
+      </div>
+    </Container>
   );
-};
-
-export default Home;
+}
