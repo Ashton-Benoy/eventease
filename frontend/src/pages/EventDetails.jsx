@@ -1,3 +1,4 @@
+// src/pages/EventDetail.jsx
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -11,19 +12,7 @@ import Input from "../components/Input";
 import "react-toastify/dist/ReactToastify.css";
 import { loadStripe } from "@stripe/stripe-js";
 
-
-
-const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
-const isLocalhost =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-
-let stripePromise = null;
-if (publishableKey && (isLocalhost || (typeof window !== "undefined" && window.location.protocol === "https:"))) {
-  stripePromise = loadStripe(publishableKey);
-} else {
-  console.warn("Stripe disabled for this session (missing key, non-HTTPS, or blocked).");
-}
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 export default function EventDetail() {
   const { id } = useParams();
@@ -32,13 +21,10 @@ export default function EventDetail() {
     defaultValues: { name: "", email: "" }
   });
 
-const { data: event, isLoading, isError } = useQuery({
-  queryKey: ["event", id],
-  queryFn: () => API.getEvent(id),
-  enabled: !!id,          
-  retry: 1,
-  staleTime: 1000 * 30
-});
+  const { data: event, isLoading, isError } = useQuery(["event", id], () => API.getEvent(id), {
+    retry: 1,
+    staleTime: 1000 * 30
+  });
 
   const onRSVP = async (values) => {
     try {
@@ -51,64 +37,43 @@ const { data: event, isLoading, isError } = useQuery({
     }
   };
 
- const handleBuy = async (ticketType) => {
-  const name = document.getElementById("buyerName")?.value;
-  const email = document.getElementById("buyerEmail")?.value;
-  if (!name || !email) {
-    toast.error("Please enter your name and a valid email above.");
-    return;
-  }
+  const handleBuy = async (ticketType) => {
+    // basic client validation - ensure buyer info is provided
+    const name = document.getElementById("buyerName")?.value;
+    const email = document.getElementById("buyerEmail")?.value;
+    if (!name || !email) {
+      toast.error("Please enter your name and a valid email above.");
+      return;
+    }
 
-  try {
-    setBuying(true);
+    try {
+      setBuying(true);
+      const { sessionId } = await API.createCheckout(id, {
+        priceCents: ticketType.priceCents,
+        ticketTypeName: ticketType.name,
+        buyerName: name,
+        buyerEmail: email
+      });
 
-
-    const { sessionId } = await API.createCheckout(id, {
-      priceCents: ticketType.priceCents,
-      ticketTypeName: ticketType.name,
-      buyerName: name,
-      buyerEmail: email
-    });
-
-    
-    if (!stripePromise) {
-      
-      if (!publishableKey) {
-        toast.info("Stripe not configured (no publishable key). Simulating successful purchase.");
-      } else if (!isLocalhost && window.location.protocol !== "https:") {
-        toast.warn("Stripe requires HTTPS for live mode. Use HTTPS or test in localhost.");
-      } else {
-        toast.warn("Stripe script blocked by browser extension. Try disabling adblocker for localhost.");
+      const stripe = await stripePromise;
+      if (!stripe) {
+        toast.error("Stripe not configured. Set VITE_STRIPE_PUBLISHABLE_KEY.");
+        setBuying(false);
+        return;
       }
 
-     
-      console.log("Mock checkout sessionId:", sessionId);
-      toast.success("Mock purchase complete — backend ticket created (if webhook simulated).");
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+      if (error) {
+        console.error(error);
+        toast.error("Stripe checkout failed. Try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create checkout session.");
+    } finally {
       setBuying(false);
-      return;
     }
-
-    // Normal Stripe flow
-    const stripe = await stripePromise;
-    if (!stripe) {
-      toast.error("Stripe failed to initialize.");
-      setBuying(false);
-      return;
-    }
-
-    const { error } = await stripe.redirectToCheckout({ sessionId });
-    if (error) {
-      console.error(error);
-      toast.error("Stripe checkout failed. Try again.");
-    }
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to create checkout session.");
-  } finally {
-    setBuying(false);
-  }
-};
-
+  };
 
   if (isLoading) {
     return (
