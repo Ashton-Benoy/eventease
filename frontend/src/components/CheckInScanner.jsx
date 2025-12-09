@@ -1,93 +1,92 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
-import API from "../services/api";
+// src/components/CheckInScanner.jsx
+import React, { useState } from 'react';
+import { QrReader } from 'react-qr-reader';
+import apiService from '../services/apiService'; 
 
-export default function CheckInScanner({ onCheckedIn }) {
-  const regionId = "html5qr-checkin-region";
-  const html5QrcodeRef = useRef(null);
-  const [status, setStatus] = useState("idle"); // idle | scanning | scanned | success | error
-  const [lastScanned, setLastScanned] = useState(null);
+const CheckInScanner = () => {
+  const [scanResult, setScanResult] = useState('');
+  const [checkInStatus, setCheckInStatus] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
 
-  useEffect(() => {
-    const start = async () => {
-      try {
-        setStatus("scanning");
-        const html5QrCode = new Html5Qrcode(regionId);
-        html5QrcodeRef.current = html5QrCode;
+  // Function to handle the successful scan of a QR code
+  const handleScan = async (result, error) => {
+    if (!!result) {
+      setScanResult(result?.text);
+      setIsScanning(false);
+      
+      // Stop the scanner and process the check-in
+      await handleCheckIn(result?.text);
+    }
 
-        const config = { fps: 10, qrbox: { width: 300, height: 300 } };
+    if (!!error && error.name !== 'NotFoundError') {
+      // You can log specific errors like PermissionDeniedError
+      console.error(error); 
+    }
+  };
 
-        await html5QrCode.start(
-          { facingMode: "environment" },
-          config,
-          async (decodedText /* decodedResult */) => {
-            // Prevent scanning same payload repeatedly
-            if (decodedText === lastScanned) {
-              return;
-            }
-            setLastScanned(decodedText);
-            setStatus("scanned");
+  // Function to send data to the backend check-in endpoint
+  const handleCheckIn = async (qrCodeData) => {
+    setCheckInStatus('Checking in...');
 
-            // expected payload format: ticketId|buyerEmail|eventId
-            const [ticketId] = decodedText.split("|");
+    try {
+      const response = await apiService('/tickets/checkin', {
+        method: 'POST',
+        // This is the data the backend expects
+        body: JSON.stringify({ qrCodeData: qrCodeData }),
+      });
 
-            try {
-              const resp = await API.checkinTicket({ ticketId });
-              setStatus("success");
-              if (onCheckedIn) onCheckedIn(resp);
-              // show success for 2s then resume scanning
-              setTimeout(async () => {
-                setStatus("scanning");
-                setLastScanned(null);
-              }, 2000);
-            } catch (err) {
-              console.error("Check-in failed:", err);
-              setStatus("error");
-              // show error for 2s then resume scanning
-              setTimeout(() => {
-                setStatus("scanning");
-                setLastScanned(null);
-              }, 2000);
-            }
-          },
-          (errorMessage) => {
-            // scanner decode error callback — do not spam console
-          }
-        );
-      } catch (err) {
-        console.error("Unable to start scanner:", err);
-        setStatus("error");
+      if (response && response.message) {
+        setCheckInStatus(`SUCCESS: ${response.message}. Attendee: ${response.attendeeName || 'N/A'}`);
       }
-    };
-
-    start();
-
-    return () => {
-      (async () => {
-        try {
-          if (html5QrcodeRef.current) {
-            await html5QrcodeRef.current.stop();
-            html5QrcodeRef.current.clear();
-          }
-        } catch (e) {
-          // ignore cleanup errors
-        }
-      })();
-    };
-  }, [onCheckedIn, lastScanned]);
+    } catch (error) {
+      setCheckInStatus(`FAILURE: ${error.message || 'Check-in failed.'}`);
+      console.error('Check-in API Error:', error);
+    }
+  };
 
   return (
-    <div className="max-w-xl mx-auto">
-      <div id={regionId} style={{ width: "100%" }} />
-      <div className="mt-3 text-sm">
-        <div>Status: <span className="font-medium">{status}</span></div>
-        {status === "success" && <div className="text-green-600">Checked in successfully ✅</div>}
-        {status === "error" && <div className="text-red-600">Check-in failed — ticket not found or already checked-in</div>}
-        {status === "scanned" && <div className="text-gray-600">Processing scan...</div>}
+    <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-indigo-700">Ticket Check-In</h2>
+      
+      <div className="mb-4 text-center">
+        <button
+          onClick={() => setIsScanning(true)}
+          disabled={isScanning}
+          className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 disabled:opacity-50"
+        >
+          {isScanning ? 'Scanner Active...' : 'Start Scanner'}
+        </button>
       </div>
-      <div className="mt-3 text-xs text-gray-500">
-        Tip: Scan a ticket QR. Expected QR payload format: <code>ticketId|buyerEmail|eventId</code>
-      </div>
+
+      {isScanning && (
+        <div className="border-4 border-gray-300 rounded-lg overflow-hidden mb-6">
+          {/* QR Code Reader Component */}
+          <QrReader
+            onResult={handleScan}
+            constraints={{ facingMode: 'environment' }} // Use rear camera on mobile
+            scanDelay={300} // Milliseconds delay between scans
+            containerStyle={{ width: '100%', padding: '20px' }}
+            videoStyle={{ width: '100%' }}
+          />
+        </div>
+      )}
+
+      {scanResult && (
+        <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+          <p className="font-semibold">Last Scanned Data:</p>
+          <p className="break-all text-sm text-gray-700">{scanResult}</p>
+        </div>
+      )}
+
+      {checkInStatus && (
+        <div className={`mt-4 p-4 rounded-lg font-bold text-center ${
+          checkInStatus.startsWith('SUCCESS') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`}>
+          {checkInStatus}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default CheckInScanner;

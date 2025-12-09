@@ -1,22 +1,19 @@
-import express from "express";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
-import User from "../models/User.js";
+// routes/userRoutes.js
+const express = require('express');
+const { protect } = require('../middleware/authMiddleware'); // Import the protection middleware
+const { getUserProfile } = require('../controllers/getUserProfile');
+const { updateUserProfile } = require('../controllers/updateProfile');
+const { getMyEvents } = require('../controllers/myEvents');
 
 const router = express.Router();
 
+// Route for fetching and updating the logged-in user's profile
+router.route('/profile')
+  .get(protect, getUserProfile) // GET /api/v1/users/profile
+  .put(protect, updateUserProfile); // PUT /api/v1/users/profile
 
-router.get("/check-user", protect, (req, res) => {
-  res.json({ message: "User route OK", user: req.user });
-});
+// Route for getting all tickets/events for the logged-in user
+router.route('/my-events')
+  .get(protect, getMyEvents); // GET /api/v1/users/my-events
 
-router.get("/check-admin", protect, adminOnly, (req, res) => {
-  res.json({ message: "Admin route OK", user: req.user });
-});
-
-
-router.get("/", protect, adminOnly, async (req, res) => {
-  const users = await User.find().select("-password");
-  res.json(users);
-});
-
-export default router;
+module.exports = router;

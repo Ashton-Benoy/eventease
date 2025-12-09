@@ -1,40 +1,19 @@
-// backend/routes/eventRoutes.js
-const express = require("express");
+// routes/eventRoutes.js
+const express = require('express');
+const { createEvent, getEventById, getEvents, updateEvent } = require('../controllers/eventController');
+const { protect } = require('../middleware/authMiddleware');
+const { isOrganizer } = require('../middleware/organizerCheck');
+
 const router = express.Router();
-const Event = require("../models/Event");
 
-// GET all events
-router.get("/", async (req, res) => {
-  try {
-    const events = await Event.find().lean();
-    res.json(events);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch events" });
-  }
-});
+// Routes for listing events and creating new ones
+router.route('/')
+  .get(getEvents) // GET /api/v1/events (Public list)
+  .post(protect, isOrganizer, createEvent); // POST /api/v1/events (Protected)
 
-// GET single event
-router.get("/:id", async (req, res) => {
-  try {
-    const ev = await Event.findById(req.params.id).lean();
-    if (!ev) return res.status(404).json({ error: "Event not found" });
-    res.json(ev);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch event" });
-  }
-});
-
-// Create event
-router.post("/", async (req, res) => {
-  try {
-    const ev = await Event.create(req.body);
-    res.json(ev);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create event" });
-  }
-});
+// Routes for detailed view and updates
+router.route('/:id')
+  .get(getEventById) // GET /api/v1/events/:id (Public/Conditional)
+  .put(protect, isOrganizer, updateEvent); // PUT /api/v1/events/:id (Protected)
 
 module.exports = router;

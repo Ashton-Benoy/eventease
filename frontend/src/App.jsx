@@ -1,33 +1,61 @@
+
+/*
+export default App;import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import HomePage from "./pages/HomePage";
+import AuthPage from "./pages/AuthPage";
+import DashboardPage from "./pages/DashboardPage";
+import EventsList from "./pages/EventsList";
+import EventDetail from "./pages/EventDetail";
+import CheckIn from "./pages/CheckIn";
+
+import ProtectedRoute from './components/ProtectedRoute';
+import CreateEvent from './pages/CreateEvent';
+
+*/
+
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import HomePage from "./pages/HomePage";
+import AuthPage from "./pages/AuthPage";
+import DashboardPage from "./pages/DashboardPage";
 import EventsList from "./pages/EventsList";
 import EventDetail from "./pages/EventDetail";
 import CheckIn from "./pages/CheckIn";
-import Dashboard from "./pages/Dashboard";
-import RSVPPage from "./pages/RSVPPage";
-import Features from "./pages/Features";
 
+import ProtectedRoute from './components/ProtectedRoute';
+import CreateEvent from './pages/CreateEvent';
 
-export default function App() {
+function App() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 py-10">
-        <Routes>
-          <Route path="/" element={<Navigate to="/events" replace />} />
-          <Route path="/events" element={<EventsList />} />
-          <Route path="/events/:id" element={<EventDetail />} />
-          <Route path="/rsvp/:id" element={<RSVPPage />} />
-          <Route path="/checkin" element={<CheckIn />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/features" element={<Features />} />
-          {/* fallback */}
-          <Route path="*" element={<div className="p-8 text-center">Page not found</div>} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      {/* 1. PUBLIC ROUTES (Accessible to everyone) */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/register" element={<AuthPage />} /> 
+      
+      {/* Route for viewing an individual event detail page */}
+      <Route path="/events/:id" element={<EventDetail />} /> 
+
+      {/* 2. PRIVATE ROUTES (Protected by the wrapper) */}
+      <Route element={<ProtectedRoute />}>
+        {/* All routes inside this group require authentication */}
+        <Route path="/dashboard" element={<DashboardPage />} />
+        
+        {/* Organizer Event Creation Route */}
+        <Route path="/events/create" element={<CreateEvent />} /> 
+        
+        {/* Add more private routes here, e.g., /profile */}
+      </Route>
+
+      {/* 3. FALLBACK ROUTE */}
+      <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+    </Routes>
   );
 }
+
+export default App;

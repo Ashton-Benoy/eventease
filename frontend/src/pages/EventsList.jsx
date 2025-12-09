@@ -1,9 +1,10 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import API from "../services/api";
+
 import { Link } from "react-router-dom";
 import Container from "../components/Container";
 import Card from "../components/Card";
+  
 
 
 
