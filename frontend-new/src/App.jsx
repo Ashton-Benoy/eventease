@@ -1,17 +1,19 @@
-// src/App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-// Layout + Components
-import Header from "./components/Header";
 
-// Pages
+import Header from "./components/Header";
+import MyTicketsPage from "./pages/MyTicketsPage";
+
+import CheckInScanner from "./pages/CheckInScanner";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
 import EventsPage from "./pages/EventsPage";
 import FeaturesPage from "./pages/FeaturesPage";
 import EventDetailPage from "./pages/EventDetailPage";
-
-import LoginPage from "./pages/LoginPage";
+import ReservePage from "./pages/CheckoutPage"; 
+import CheckoutPage from "./pages/CheckoutPage";
 import DashboardPage from "./pages/DashboardPage";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import TicketSuccess from "./pages/TicketSuccess";
@@ -33,7 +35,7 @@ export default function App() {
           <Route path="/events/:id" element={<EventDetailPage />} />
 
          
-
+          <Route path="/checkout/:id" element={<ReservePage />} />  
           {/* Features */}
           <Route path="/features" element={<FeaturesPage />} />
 
@@ -43,6 +45,11 @@ export default function App() {
           {/* Organizer dashboard */}
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/checkout/success" element={<CheckoutSuccess />} />
+          <Route path="/my-tickets" element={<MyTicketsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/events/:eventId/checkin" element={<CheckInScanner />}/>
+          <Route path="/signup" element={<SignupPage />} /> 
+          <Route path="/checkout/:id" element={<CheckoutPage />} />
           <Route path="/tickets/success/:id" element={<TicketSuccess />} />
         </Routes>
       </main>

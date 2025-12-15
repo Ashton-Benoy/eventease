@@ -1,49 +1,118 @@
 // src/pages/EventsPage.jsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import EventCard from "../components/EventCard";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-const EVENTS = [
-  { id: "1", title: "Tech Meetup", date: "Dec 18, 2025", location: "Bengaluru", description: "Community tech meetup" },
-  { id: "2", title: "Design Workshop", date: "Jan 10, 2026", location: "Mumbai", description: "Hands-on design workshop" },
-  { id: "3", title: "Music Fest", date: "Apr 20, 2026", location: "Goa", description: "Open-air music festival" },
-];
+export default function EventsPage() {
+  const [events, setEvents] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-export default function EventsPage(){
-  const nav = useNavigate();
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/events`
+        );
 
-  async function reserve(evId) {
-    try {
-      // simple static user info for now; use auth in future
-      const payload = { eventId: evId, name: "Guest", email: "" };
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tickets`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || `Server returned ${res.status}`);
-      // navigate to success page with ticket id
-      nav(`/tickets/success/${data.ticketId}`);
-    } catch (err) {
-      alert("Failed to reserve ticket: " + (err.message || err));
-      console.error(err);
+        if (!res.ok) throw new Error("Unable to load events");
+
+        const data = await res.json();
+        setEvents(data || []);
+      } catch (err) {
+        console.error(err);
+        setError("Events are unavailable right now.");
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+
+    loadEvents();
+  }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Upcoming events</h2>
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      {/* HEADER */}
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-bold">Browse events</h1>
+        <p className="text-gray-600 mt-2">
+          Discover upcoming events and reserve your seat.
+        </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {EVENTS.map(ev => (
-          <div key={ev.id}>
-            <EventCard {...ev} onDetails={() => nav(`/events/${ev.id}`)} onBuy={() => reserve(ev.id)} />
-          </div>
-        ))}
+      {/* TOOLBAR */}
+      <div className="mb-8 flex flex-col md:flex-row gap-4">
+        <input
+          type="text"
+          placeholder="Search events…"
+          className="flex-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500"
+        />
+        <select className="px-4 py-2 rounded-lg border">
+          <option>All categories</option>
+          <option>Tech</option>
+          <option>Design</option>
+          <option>Business</option>
+        </select>
       </div>
+
+      {/* CONTENT */}
+      {loading && (
+        <div className="text-center text-gray-500 py-20">
+          Loading events…
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="text-center py-20">
+          <p className="text-red-600 font-medium">{error}</p>
+          <p className="text-gray-500 text-sm mt-2">
+            Please try again later.
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && events.length === 0 && (
+        <div className="text-center py-20">
+          <p className="text-lg font-medium">No events yet</p>
+          <p className="text-gray-500 mt-2">
+            Check back soon for new events.
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && events.length > 0 && (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <div
+              key={event._id}
+              className="rounded-xl border bg-white p-5 hover:shadow-md transition"
+            >
+              <h3 className="font-semibold text-lg">
+                {event.title}
+              </h3>
+
+              <p className="text-sm text-gray-600 mt-1">
+                {event.date || "Date TBA"} · {event.location || "Online"}
+              </p>
+
+              <p className="text-sm text-gray-500 mt-3 line-clamp-3">
+                {event.description || "No description available."}
+              </p>
+
+              <div className="mt-5 flex justify-between items-center">
+                <span className="text-indigo-600 font-semibold">
+                  Free
+                </span>
+                <Link
+                  to={`/events/${event._id}`}
+                  className="text-indigo-600 font-medium hover:underline"
+                >
+                  View →
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
