@@ -1,24 +1,11 @@
-const express = require("express");
-const router = express.Router();
-
-// TEMP in-memory events (safe starter)
-router.get("/", (req, res) => {
-  res.json([
-    {
-      _id: "1",
-      title: "Tech Meetup",
-      description: "A meetup for developers",
-      date: "2025-01-15",
-      location: "Online"
-    },
-    {
-      _id: "2",
-      title: "Design Workshop",
-      description: "Hands-on UI/UX workshop",
-      date: "2025-02-01",
-      location: "Bangalore"
+router.get("/:id", async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
     }
-  ]);
+    res.json(event);
+  } catch (err) {
+    res.status(500).json({ error: "Invalid ID" });
+  }
 });
-
-module.exports = router;
