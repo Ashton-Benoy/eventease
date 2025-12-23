@@ -5,13 +5,22 @@ import Button from "../components/Button";
 export default function RegisterPage() {
   return (
     <Container className="py-12 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Register
+      </h1>
 
       <Input label="Name" />
       <Input label="Email" type="email" />
       <Input label="Password" type="password" />
 
-      <Button className="w-full mt-4">Create Account</Button>
+      <Button className="w-full mt-4">
+        Create Account
+      </Button>
+
+      {/* Tailwind test block */}
+      <div className="mt-6 p-6 bg-red-500 text-white rounded-lg text-center">
+        Tailwind is working
+      </div>
     </Container>
   );
 }

@@ -26,12 +26,7 @@ export default function HomePage() {
               Browse Events
             </Link>
 
-            <Link
-              to="/features"
-              className="px-6 py-3 rounded-lg border border-gray-300 font-medium hover:bg-gray-50 transition"
-            >
-              See Features
-            </Link>
+            
           </div>
         </div>
 
@@ -41,10 +36,14 @@ export default function HomePage() {
             <span className="text-xs font-medium text-indigo-600 uppercase">
               Featured Event
             </span>
-            <h3 className="text-xl font-semibold">Tech Meetup 2025</h3>
-            <p className="text-sm text-gray-600">
-              Bengaluru · Dec 15 · 6:30 PM
-            </p>
+         <h3 className="
+  text-lg font-semibold
+  text-slate-900 dark:text-slate-100
+">
+  Tech Meetup 2025
+</h3>
+
+            
             <Link
               to="/events"
               className="inline-block w-full text-center rounded-md bg-indigo-600 text-white py-2 hover:bg-indigo-700"
@@ -91,3 +90,4 @@ export default function HomePage() {
     </div>
   );
 }
+
