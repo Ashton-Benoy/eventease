@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
     createdAt: new Date(),
   };
 
-  // 🔥 Generate QR code that contains ticketId
+ 
   const qrData = JSON.stringify({
     ticketId,
     eventId,

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const UserSchema = new Schema({
   name: String,
   email: { type: String, unique: true, index: true },
-  passwordHash: String, // hashed via bcrypt
+  passwordHash: String, 
   role: { type: String, enum: ['admin','organizer','attendee'], default: 'attendee' },
   createdAt: { type: Date, default: Date.now }
 });

@@ -1,4 +1,4 @@
-// backend/seed.js
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Event = require('./models/Event');
@@ -11,11 +11,11 @@ async function run() {
 
     console.log('Connected to Mongo. Seeding...');
 
-    // Example event (adjust dates if you want)
+   
     const demo = {
       title: "Demo Launch Party",
       description: "A sample demo event created by seed script.",
-      startAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // one week from now
+      startAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
       endAt: new Date(Date.now() + 1000 * 60 * 60 * 26 * 7).toISOString(),
       location: "Virtual - Zoom",
       tickets: [
@@ -24,7 +24,7 @@ async function run() {
       ]
     };
 
-    // Remove older demo events (optional)
+
     await Event.deleteMany({ title: demo.title });
 
     const created = await Event.create(demo);

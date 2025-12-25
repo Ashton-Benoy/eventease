@@ -1,14 +1,14 @@
-// backend/routes/paymentRoutes.js
-import express from "express"; // or const express = require('express'); if using CommonJS
+
+import express from "express"; 
 import Stripe from "stripe";
 
 const router = express.Router();
-const stripe = new Stripe(process.env.STRIPE_SECRET); // ensure STRIPE_SECRET is set in backend .env
+const stripe = new Stripe(process.env.STRIPE_SECRET); 
 
-// create payment intent
+
 router.post("/create-payment-intent", async (req, res) => {
   try {
-    // expected body: { amountCents: number, currency: "usd", metadata: {...} }
+   
     const { amountCents, currency = "usd", metadata = {} } = req.body;
 
     if (!amountCents || amountCents <= 0) {
@@ -18,7 +18,7 @@ router.post("/create-payment-intent", async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountCents,
       currency,
-      automatic_payment_methods: { enabled: true }, // lets Stripe decide card/pm types
+      automatic_payment_methods: { enabled: true }, 
       metadata,
     });
 

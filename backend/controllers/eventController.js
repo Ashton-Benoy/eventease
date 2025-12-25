@@ -1,4 +1,4 @@
-// backend/controllers/eventController.js
+
 
 const EVENTS = [
   {
