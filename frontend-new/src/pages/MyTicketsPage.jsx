@@ -1,67 +1,58 @@
-// src/pages/MyTicketsPage.jsx
-import { useState } from "react";
+import { Link } from "react-router-dom";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function MyTicketsPage() {
-  const [ticketId, setTicketId] = useState("");
-  const [ticket, setTicket] = useState(null);
-  const [error, setError] = useState("");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  async function handleViewTicket() {
-    setError("");
-    setTicket(null);
+  if (!user) {
+    return (
+      <div className="p-10 text-center text-red-500">
+        Please log in to view your tickets
+      </div>
+    );
+  }
 
-    if (!ticketId) {
-      setError("Please enter a ticket ID");
-      return;
-    }
-
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/tickets/${ticketId}`
-      );
-
-      if (!res.ok) {
-        throw new Error("Ticket not found");
-      }
-
-      const data = await res.json();
-      setTicket(data);
-    } catch (err) {
-      setError(err.message);
-    }
+  if (!user.tickets || user.tickets.length === 0) {
+    return (
+      <div className="p-10 text-center">
+        <h2 className="text-xl font-semibold mb-4">No tickets found</h2>
+        <Link to="/events" className="text-blue-500 underline">
+          Browse events
+        </Link>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-xl mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6">My Ticket</h1>
+    <div className="p-10">
+      <h1 className="text-2xl font-bold mb-6">My Tickets</h1>
 
-      <input
-        type="text"
-        placeholder="Enter Ticket ID"
-        value={ticketId}
-        onChange={(e) => setTicketId(e.target.value)}
-        className="w-full border rounded px-4 py-2 mb-4"
-      />
+      <div className="grid gap-6 md:grid-cols-2">
+        {user.tickets.map((ticket) => (
+          <div
+            key={ticket.id}
+            className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow"
+          >
+            <h2 className="text-lg font-semibold">{ticket.event}</h2>
+            <p className="text-gray-500 dark:text-gray-400">
+              {ticket.date}
+            </p>
 
-      <button
-        onClick={handleViewTicket}
-        className="bg-indigo-600 text-white px-4 py-2 rounded"
-      >
-        View Ticket
-      </button>
+            <div className="mt-4 flex justify-center">
+              <QRCodeCanvas
+                value={ticket.id}
+                size={140}
+                bgColor="#ffffff"
+                fgColor="#000000"
+              />
+            </div>
 
-      {error && (
-        <p className="text-red-600 mt-4">{error}</p>
-      )}
-
-      {ticket && (
-        <div className="mt-6 p-4 border rounded bg-gray-50">
-          <p><strong>Ticket ID:</strong> {ticket.ticketId}</p>
-          <p><strong>Name:</strong> {ticket.name}</p>
-          <p><strong>Email:</strong> {ticket.email}</p>
-          <p><strong>Event ID:</strong> {ticket.eventId}</p>
-        </div>
-      )}
+            <p className="text-center text-sm mt-2 text-gray-400">
+              Ticket ID: {ticket.id}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function CheckInScanner() {
         }
       },
       (error) => {
-        // ignore scan errors
+      
       }
     );
 

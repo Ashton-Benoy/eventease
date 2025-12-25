@@ -17,15 +17,15 @@ const Dashboard = () => {
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) return;
 
-      // Fetch profile
+    
       const res1 = await API.get("/auth/me");
       setProfile(res1.data.user);
 
-      // Fetch events created by user
+      
       const res2 = await API.get(`/events/my-events/${user._id}`);
       setMyEvents(res2.data);
 
-      // Fetch user's RSVPs
+    
       const res3 = await API.get(`/events/my-rsvps/${user._id}`);
       setMyRsvps(res3.data);
     } catch (err) {

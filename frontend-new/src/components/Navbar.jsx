@@ -1,59 +1,70 @@
-import { Link, NavLink } from "react-router-dom";
-import ThemeToggle from "./ThemeToggle";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const admin = JSON.parse(localStorage.getItem("admin"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("admin");
+    navigate("/login");
+  };
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-          <span className="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-600 text-white">
-            E
-          </span>
-          <span>EventEase</span>
-        </Link>
+    <nav className="w-full px-6 py-4 flex items-center justify-between bg-white dark:bg-slate-900 border-b dark:border-slate-800">
+      {/* Logo */}
+      <Link to="/" className="flex items-center gap-2 font-bold text-lg">
+        <span className="bg-indigo-600 text-white px-2 py-1 rounded">E</span>
+        EventEase
+      </Link>
 
-        {/* Nav links */}
-        <nav className="flex items-center gap-6">
-          <NavLink
-            to="/events"
-            className={({ isActive }) =>
-              isActive
-                ? "text-indigo-600 font-medium"
-                : "text-slate-600 dark:text-slate-300 hover:text-indigo-600"
-            }
-          >
-            Browse Events
-          </NavLink>
+      {/* Links */}
+      <div className="flex items-center gap-6">
+        {/* PUBLIC */}
+        {!user && !admin && (
+          <>
+            <Link to="/events">Browse Events</Link>
+            <Link to="/login">Log in</Link>
+            <Link
+              to="/signup"
+              className="bg-indigo-600 text-white px-4 py-1.5 rounded"
+            >
+              Sign up
+            </Link>
+          </>
+        )}
 
-          <NavLink
-            to="/my-tickets"
-            className={({ isActive }) =>
-              isActive
-                ? "text-indigo-600 font-medium"
-                : "text-slate-600 dark:text-slate-300 hover:text-indigo-600"
-            }
-          >
-            My Tickets
-          </NavLink>
+        {/* USER */}
+        {user && !admin && (
+          <>
+            <Link to="/events">Browse Events</Link>
+            <Link to="/my-tickets">My Tickets</Link>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 font-medium"
+            >
+              Logout
+            </button>
+          </>
+        )}
 
-          <NavLink
-            to="/login"
-            className="text-slate-600 dark:text-slate-300 hover:text-indigo-600"
-          >
-            Log in
-          </NavLink>
-
-          <NavLink
-            to="/signup"
-            className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
-          >
-            Sign up
-          </NavLink>
-
-          <ThemeToggle />
-        </nav>
+        {/* ADMIN */}
+        {admin && (
+          <>
+            <Link to="/admin/dashboard">Dashboard</Link>
+            <Link to="/admin/events">Manage Events</Link>
+            <Link to="/admin/attendees">Attendees</Link>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 font-medium"
+            >
+              Logout
+            </button>
+          </>
+        )}
       </div>
-    </header>
+    </nav>
   );
 }
