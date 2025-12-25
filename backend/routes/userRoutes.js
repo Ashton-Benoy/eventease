@@ -19,4 +19,4 @@ router.get("/", protect, adminOnly, async (req, res) => {
   res.json(users);
 });
 
-export default router;
+module.exports = router;
