@@ -6,62 +6,35 @@ export default function Navbar() {
   const user = JSON.parse(localStorage.getItem("user"));
   const admin = JSON.parse(localStorage.getItem("admin"));
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("admin");
+  const logout = () => {
+    localStorage.clear();
     navigate("/login");
   };
 
   return (
-    <nav className="w-full px-6 py-4 flex items-center justify-between bg-white dark:bg-slate-900 border-b dark:border-slate-800">
-      {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-        <span className="bg-indigo-600 text-white px-2 py-1 rounded">E</span>
-        EventEase
-      </Link>
+    <nav className="flex justify-between items-center px-6 py-4 bg-white dark:bg-slate-900 shadow">
+      <Link to="/" className="font-bold text-xl">EventEase</Link>
 
-      {/* Links */}
-      <div className="flex items-center gap-6">
-        {/* PUBLIC */}
-        {!user && !admin && (
+      <div className="flex gap-4 items-center">
+        {admin && (
           <>
-            <Link to="/events">Browse Events</Link>
-            <Link to="/login">Log in</Link>
-            <Link
-              to="/signup"
-              className="bg-indigo-600 text-white px-4 py-1.5 rounded"
-            >
-              Sign up
-            </Link>
+            <Link to="/admin">Admin Panel</Link>
+            <button onClick={logout} className="text-red-500">Logout</button>
           </>
         )}
 
-        {/* USER */}
         {user && !admin && (
           <>
             <Link to="/events">Browse Events</Link>
             <Link to="/my-tickets">My Tickets</Link>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 font-medium"
-            >
-              Logout
-            </button>
+            <button onClick={logout} className="text-red-500">Logout</button>
           </>
         )}
 
-        {/* ADMIN */}
-        {admin && (
+        {!user && !admin && (
           <>
-            <Link to="/admin/dashboard">Dashboard</Link>
-            <Link to="/admin/events">Manage Events</Link>
-            <Link to="/admin/attendees">Attendees</Link>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 font-medium"
-            >
-              Logout
-            </button>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
           </>
         )}
       </div>

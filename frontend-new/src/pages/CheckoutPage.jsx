@@ -1,87 +1,58 @@
-
-import { Link } from "react-router-dom";
-
-
-import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function CheckoutPage() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
-  async function handleBuy(e) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
+  const submit = async () => {
     try {
-      const api = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-      const res = await fetch(`${api}/api/tickets`, {
+      const res = await fetch("http://localhost:5000/api/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventId: id,
-          name,
-          email,
-        }),
+        body: JSON.stringify({ name, email, eventId: id }),
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data?.error || "Failed to reserve ticket");
-      }
+      if (!res.ok) throw new Error(data.message);
 
-      navigate(`/tickets/success/${data.ticketId}`);
+      navigate(`/tickets/success/${data.ticket.id}`);
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="max-w-lg mx-auto py-12 px-4">
-      <h1 className="text-2xl font-bold mb-2">Buy Ticket</h1>
-      <p className="text-gray-600 mb-6">Event ID: {id}</p>
+    <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Buy Ticket</h2>
 
-      <form onSubmit={handleBuy} className="bg-white p-6 rounded-xl shadow space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Name</label>
-          <input
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full border rounded px-3 py-2"
-          />
-        </div>
+      <input
+        className="w-full border p-2 mb-3"
+        placeholder="Name"
+        value={name}
+        onChange={e => setName(e.target.value)}
+      />
 
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full border rounded px-3 py-2"
-          />
-        </div>
+      <input
+        className="w-full border p-2 mb-3"
+        placeholder="Email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+      />
 
-        {error && <div className="text-red-600 text-sm">{error}</div>}
+      {error && <p className="text-red-500 mb-2">{error}</p>}
 
-        <button
-          disabled={loading}
-          className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
-        >
-          {loading ? "Reserving ticket…" : "Confirm Ticket"}
-        </button>
-      </form>
+      <button
+        onClick={submit}
+        className="w-full bg-indigo-600 text-white p-2 rounded"
+      >
+        Confirm Ticket
+      </button>
     </div>
   );
 }

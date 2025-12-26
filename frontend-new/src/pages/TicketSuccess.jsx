@@ -1,38 +1,39 @@
-
-import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function TicketSuccess() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/tickets/${id}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || `Server ${res.status}`);
-        setTicket(data);
-      } catch (err) {
-        setError(err.message || err);
-      }
-    }
-    load();
+    fetch(`http://localhost:5000/api/tickets/${id}`)
+      .then(res => res.json())
+      .then(setTicket);
   }, [id]);
 
-  if (error) return <div className="p-8 text-center text-red-600">Error: {error}</div>;
-  if (!ticket) return <div className="p-8 text-center">Loading ticket…</div>;
+  if (!ticket) {
+    return <p className="text-center mt-10">Loading ticket...</p>;
+  }
 
   return (
-    <div className="max-w-xl mx-auto p-8">
-      <div className="bg-white p-6 rounded-2xl shadow text-center">
-        <h2 className="text-2xl font-bold">Reservation confirmed</h2>
-        <p className="mt-3 text-gray-600">Ticket ID: <code className="break-words">{ticket.ticketId}</code></p>
-        <p className="mt-2">Event: <strong>{ticket.eventId}</strong></p>
-        <p className="mt-2">Name: {ticket.name}</p>
-        <p className="mt-2 text-sm text-gray-500">Present this ticket ID at the venue to check in.</p>
+    <div className="max-w-md mx-auto mt-12 bg-white dark:bg-slate-900 p-6 rounded shadow text-center">
+      <h1 className="text-2xl font-bold mb-4">🎟 Ticket Confirmed</h1>
+
+      <p className="mb-1"><strong>Name:</strong> {ticket.name}</p>
+      <p className="mb-1"><strong>Email:</strong> {ticket.email}</p>
+      <p className="mb-4"><strong>Event ID:</strong> {ticket.eventId}</p>
+
+      <div className="flex justify-center my-4">
+        <QRCodeCanvas
+          value={JSON.stringify(ticket)}
+          size={180}
+        />
       </div>
+
+      <p className="text-sm text-gray-500">
+        Show this QR code at the event entrance
+      </p>
     </div>
   );
 }

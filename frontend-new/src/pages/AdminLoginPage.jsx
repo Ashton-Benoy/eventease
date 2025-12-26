@@ -2,42 +2,58 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState("");
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
 
- 
-    localStorage.setItem(
-      "admin",
-      JSON.stringify({
-        email,
-        role: "admin",
-      })
-    );
-
-    navigate("/admin");
+  
+    if (email === "admin@eventease.com" && password === "admin123") {
+      localStorage.setItem(
+        "admin",
+        JSON.stringify({ role: "admin", email })
+      );
+      navigate("/admin");
+    } else {
+      setError("Invalid admin credentials");
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
       <form
         onSubmit={handleLogin}
-        className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow w-80"
+        className="bg-white dark:bg-slate-800 p-6 rounded shadow w-96"
       >
-        <h2 className="text-xl font-bold text-center mb-4">Admin Login</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Admin Login</h2>
+
+        {error && <p className="text-red-500 mb-2">{error}</p>}
 
         <input
           type="email"
-          placeholder="Admin email"
+          placeholder="Admin Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-3 p-2 border rounded"
           required
-          className="w-full p-2 border rounded mb-4 dark:bg-slate-800"
         />
 
-        <button className="w-full bg-red-600 text-white py-2 rounded">
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-4 p-2 border rounded"
+          required
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white py-2 rounded"
+        >
           Login as Admin
         </button>
       </form>

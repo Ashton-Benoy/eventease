@@ -1,55 +1,50 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { QRCodeCanvas } from "qrcode.react";
 
 export default function MyTicketsPage() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [tickets, setTickets] = useState([]);
+  const email = localStorage.getItem("userEmail");
 
-  if (!user) {
-    return (
-      <div className="p-10 text-center text-red-500">
-        Please log in to view your tickets
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!email) return;
 
-  if (!user.tickets || user.tickets.length === 0) {
+    fetch(`http://localhost:5000/api/tickets/user/${email}`)
+      .then(res => res.json())
+      .then(setTickets);
+  }, [email]);
+
+  if (!email) {
     return (
-      <div className="p-10 text-center">
-        <h2 className="text-xl font-semibold mb-4">No tickets found</h2>
-        <Link to="/events" className="text-blue-500 underline">
-          Browse events
-        </Link>
-      </div>
+      <p className="text-center mt-10 text-red-500">
+        Please login to view your tickets
+      </p>
     );
   }
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold mb-6">My Tickets</h1>
+    <div className="max-w-4xl mx-auto mt-10">
+      <h1 className="text-2xl font-bold mb-6">🎟 My Tickets</h1>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {user.tickets.map((ticket) => (
+      {tickets.length === 0 && (
+        <p className="text-gray-500">No tickets found.</p>
+      )}
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {tickets.map(ticket => (
           <div
             key={ticket.id}
-            className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow"
+            className="bg-white dark:bg-slate-900 p-4 rounded shadow"
           >
-            <h2 className="text-lg font-semibold">{ticket.event}</h2>
-            <p className="text-gray-500 dark:text-gray-400">
-              {ticket.date}
-            </p>
+            <h3 className="font-semibold">Event ID: {ticket.eventId}</h3>
+            <p>Name: {ticket.name}</p>
+            <p>Email: {ticket.email}</p>
 
-            <div className="mt-4 flex justify-center">
-              <QRCodeCanvas
-                value={ticket.id}
-                size={140}
-                bgColor="#ffffff"
-                fgColor="#000000"
-              />
-            </div>
-
-            <p className="text-center text-sm mt-2 text-gray-400">
-              Ticket ID: {ticket.id}
-            </p>
+            <Link
+              to={`/tickets/success/${ticket.id}`}
+              className="text-indigo-600 text-sm mt-2 inline-block"
+            >
+              View Ticket →
+            </Link>
           </div>
         ))}
       </div>

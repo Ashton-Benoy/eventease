@@ -1,39 +1,59 @@
-import { useParams } from "react-router-dom";
-import { events } from "../data/events";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function EventDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const event = events.find(e => e.id === id);
+  useEffect(() => {
+    fetch("http://localhost:5000/api/events")
+      .then(res => res.json())
+      .then(data => {
+        console.log("ALL EVENTS:", data);
+        console.log("LOOKING FOR ID:", id);
+
+        const found = data.find(e => String(e.id) === String(id));
+
+        if (!found) {
+          setEvent(null);
+        } else {
+          setEvent(found);
+        }
+
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-10 text-center">Loading event…</div>;
+  }
 
   if (!event) {
     return (
-      <div className="p-6 text-red-500">
-        Event not found
+      <div className="p-10 text-center text-red-500">
+        ❌ Event not found
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-2 dark:text-white">
-        {event.title}
-      </h1>
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white dark:bg-slate-900 rounded-lg shadow">
+      <h1 className="text-2xl font-bold mb-2">{event.title}</h1>
 
-      <p className="text-slate-600 dark:text-slate-400 mb-4">
-        {event.date} · {event.time} · {event.location}
+      <p className="text-gray-500 mb-4">
+        {event.date} • {event.location}
       </p>
 
-      <p className="mb-6 dark:text-slate-300">
-        {event.description}
-      </p>
+      <p className="mb-6">{event.description || "No description provided."}</p>
 
-      <a
-        href={`/checkout/${event.id}`}
-        className="bg-indigo-600 text-white px-6 py-3 rounded-lg"
+      <button
+        onClick={() => navigate(`/checkout/${event.id}`)}
+        className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
       >
-        Reserve Ticket
-      </a>
+        Buy Ticket
+      </button>
     </div>
   );
 }

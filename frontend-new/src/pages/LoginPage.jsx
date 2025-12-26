@@ -19,6 +19,7 @@ export default function LoginPage() {
     );
 
     navigate("/my-tickets");
+    localStorage.setItem("userEmail", email);
   };
 
   return (
