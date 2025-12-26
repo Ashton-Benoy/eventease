@@ -1,61 +1,60 @@
-const express = require("express");
+import express from "express";
+
 const router = express.Router();
 
-const Event = require("../models/Event");
-const authMiddleware = require("../middleware/authMiddleware");
+
+let events = [
+  {
+    id: "1",
+    title: "Tech Conference",
+    date: "2025-02-10",
+    location: "Bangalore",
+  },
+  {
+    id: "2",
+    title: "Music Fest",
+    date: "2025-03-05",
+    location: "Mumbai",
+  },
+];
 
 
-router.get("/", async (req, res) => {
-  try {
-    const events = await Event.find().sort({ date: 1 });
-    res.json(events);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch events" });
-  }
+router.get("/", (req, res) => {
+  res.json(events);
 });
 
 
-router.get("/:id", async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: "Event not found" });
-    res.json(event);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch event" });
+router.get("/:id", (req, res) => {
+  const event = events.find(e => e.id === req.params.id);
+  if (!event) {
+    return res.status(404).json({ message: "Event not found" });
   }
+  res.json(event);
 });
 
 
-router.post("/", authMiddleware, async (req, res) => {
-  try {
-    const event = new Event(req.body);
-    await event.save();
-    res.status(201).json(event);
-  } catch (err) {
-    res.status(400).json({ message: "Failed to create event" });
+router.post("/", (req, res) => {
+  const { title, date, location } = req.body;
+
+  if (!title || !date || !location) {
+    return res.status(400).json({ message: "Missing fields" });
   }
+
+  const newEvent = {
+    id: Date.now().toString(),
+    title,
+    date,
+    location,
+  };
+
+  events.push(newEvent);
+  res.json(newEvent);
 });
 
 
-router.put("/:id", authMiddleware, async (req, res) => {
-  try {
-    const event = await Event.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json(event);
-  } catch (err) {
-    res.status(400).json({ message: "Failed to update event" });
-  }
+router.delete("/:id", (req, res) => {
+  events = events.filter(e => e.id !== req.params.id);
+  res.json({ success: true });
 });
 
-
-router.delete("/:id", authMiddleware, async (req, res) => {
-  try {
-    await Event.findByIdAndDelete(req.params.id);
-    res.json({ message: "Event deleted" });
-  } catch (err) {
-    res.status(400).json({ message: "Failed to delete event" });
-  }
-});
-
-module.exports = router;
+export default router;
