@@ -8,7 +8,7 @@ export default function MyTicketsPage() {
   useEffect(() => {
     if (!email) return;
 
-    fetch(`http://localhost:5000/api/tickets/user/${email}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/events`)
       .then(res => res.json())
       .then(setTickets);
   }, [email]);

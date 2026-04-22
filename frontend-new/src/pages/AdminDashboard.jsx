@@ -7,7 +7,7 @@ export default function AdminDashboard() {
   const [location, setLocation] = useState("");
 
   const loadEvents = () => {
-    fetch("http://localhost:5000/api/events")
+    fetch(`${import.meta.env.VITE_API_URL}/api/events`)
       .then(res => res.json())
       .then(setEvents);
   };
@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   }, []);
 
   const addEvent = async () => {
-    await fetch("http://localhost:5000/api/events", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/events`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, date, location }),
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   };
 
   const deleteEvent = async (id) => {
-    await fetch(`http://localhost:5000/api/events/${id}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/events/${id}`, {
       method: "DELETE",
     });
     loadEvents();

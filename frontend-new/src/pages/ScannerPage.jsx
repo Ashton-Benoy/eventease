@@ -19,10 +19,10 @@ export default function ScannerPage() {
         try {
           const { ticketId } = JSON.parse(decodedText);
 
-          const res = await fetch(
-            `http://localhost:5000/api/tickets/${ticketId}/checkin`,
-            { method: "POST" }
-          );
+         const res = await fetch(
+  `${import.meta.env.VITE_API_URL}/api/tickets/${ticketId}/checkin`,
+  { method: "POST" }
+);
 
           const data = await res.json();
           if (!res.ok) throw new Error(data.error);

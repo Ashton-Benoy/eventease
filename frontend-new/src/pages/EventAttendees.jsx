@@ -9,7 +9,7 @@ export default function EventAttendees() {
   useEffect(() => {
     socket.emit("join-event", eventId);
 
-    fetch(`http://localhost:5000/api/tickets/event/${eventId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/events`)
       .then(res => res.json())
       .then(setAttendees);
 

@@ -7,7 +7,7 @@ export default function TicketSuccess() {
   const [ticket, setTicket] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/tickets/${id}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/events`)
       .then(res => res.json())
       .then(setTicket);
   }, [id]);

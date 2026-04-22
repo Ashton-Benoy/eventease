@@ -14,7 +14,7 @@ export default function CheckInScanner() {
         try {
           const data = JSON.parse(decodedText);
 
-          await fetch(`http://localhost:5000/api/tickets/${data.ticketId}/checkin`, {
+          await fetch(`${import.meta.env.VITE_API_URL}/api/tickets/${data.ticketId}/checkin`, {
             method: "POST",
           });
 
