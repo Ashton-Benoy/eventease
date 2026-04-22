@@ -2,28 +2,21 @@ import express from "express";
 
 const router = express.Router();
 
-
 let events = [
   {
     id: "1",
-    title: "Tech Conference",
-    date: "2025-02-10",
-    location: "Bangalore",
-  },
-  {
-    id: "2",
-    title: "Music Fest",
-    date: "2025-03-05",
-    location: "Mumbai",
+    title: "Tech Meetup",
+    date: "Dec 15",
+    location: "Bengaluru",
   },
 ];
 
-
+// GET ALL EVENTS
 router.get("/", (req, res) => {
   res.json(events);
 });
 
-
+// GET EVENT BY ID
 router.get("/:id", (req, res) => {
   const event = events.find(e => e.id === req.params.id);
   if (!event) {
@@ -32,13 +25,9 @@ router.get("/:id", (req, res) => {
   res.json(event);
 });
 
-
+// ADD EVENT
 router.post("/", (req, res) => {
   const { title, date, location } = req.body;
-
-  if (!title || !date || !location) {
-    return res.status(400).json({ message: "Missing fields" });
-  }
 
   const newEvent = {
     id: Date.now().toString(),
@@ -51,7 +40,7 @@ router.post("/", (req, res) => {
   res.json(newEvent);
 });
 
-
+// DELETE EVENT
 router.delete("/:id", (req, res) => {
   events = events.filter(e => e.id !== req.params.id);
   res.json({ success: true });

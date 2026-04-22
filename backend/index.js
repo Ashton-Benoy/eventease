@@ -1,25 +1,24 @@
 ﻿import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 
-import ticketRoutes from "./routes/ticketRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
-
-dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/tickets", ticketRoutes);
-app.use("/api/events", eventRoutes);
-
+// Root test
 app.get("/", (req, res) => {
-  res.json({ status: "API running" });
+  res.send("Backend is running 🚀");
 });
 
-const PORT = 5000;
+// ✅ CONNECT EVENTS ROUTE
+app.use("/api/events", eventRoutes);
+
+// Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
