@@ -8,20 +8,15 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/events")
+    fetch(`${import.meta.env.VITE_API_URL}/api/events/${id}`)
       .then(res => res.json())
       .then(data => {
-        console.log("ALL EVENTS:", data);
-        console.log("LOOKING FOR ID:", id);
-
-        const found = data.find(e => String(e.id) === String(id));
-
-        if (!found) {
-          setEvent(null);
-        } else {
-          setEvent(found);
-        }
-
+        console.log("EVENT:", data);
+        setEvent(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
         setLoading(false);
       });
   }, [id]);
@@ -46,7 +41,9 @@ export default function EventDetailPage() {
         {event.date} • {event.location}
       </p>
 
-      <p className="mb-6">{event.description || "No description provided."}</p>
+      <p className="mb-6">
+        {event.description || "No description provided."}
+      </p>
 
       <button
         onClick={() => navigate(`/checkout/${event.id}`)}
