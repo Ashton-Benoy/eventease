@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { API } from "../services/apiService";
+import { getEvents } from "../services/apiService";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
