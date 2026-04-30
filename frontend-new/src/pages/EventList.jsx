@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Container from "../components/Container";
 import Card from "../components/Card";
 import { Link } from "react-router-dom";
-import api from "../services/apiService";
+import { API } from "../services/apiService";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function EventList() {
