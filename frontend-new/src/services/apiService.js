@@ -1,4 +1,4 @@
-const API = import.meta.env.VITE_API_URL;
+ export const API = import.meta.env.VITE_API_URL;
 
 export const getEvents = () =>
   fetch(`${API}/api/events`).then(res => res.json());
