@@ -10,7 +10,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 export default function EventList() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["events"],
-    queryFn: api.getEvents,
+    queryFn: getEvents,
   });
 
   const [q, setQ] = useState("");

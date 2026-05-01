@@ -24,12 +24,13 @@ setProfile(data1.user);
       setProfile(res1.data.user);
 
       
-      const res2 = await API.get(`/events/my-events/${user._id}`);
-      setMyEvents(res2.data);
+      const res2 = await fetch(`${import.meta.env.VITE_API_URL}/api/events/my-events/${user._id}`);
+const data2 = await res2.json();
+setMyEvents(data2);
 
-    
-      const res3 = await API.get(`/events/my-rsvps/${user._id}`);
-      setMyRsvps(res3.data);
+const res3 = await fetch(`${import.meta.env.VITE_API_URL}/api/events/my-rsvps/${user._id}`);
+const data3 = await res3.json();
+setMyRsvps(data3);
     } catch (err) {
       console.error("Dashboard load failed:", err);
     } finally {
