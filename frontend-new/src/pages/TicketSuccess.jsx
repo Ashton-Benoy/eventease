@@ -11,6 +11,15 @@ export default function TicketSuccess() {
   setTicket(savedTicket);
 }, []);
 
+if (!savedTicket) {
+  return (
+    <div className="text-center mt-10">
+      <h2 className="text-xl font-bold">No ticket found</h2>
+      <p>Please book a ticket first.</p>
+    </div>
+  );
+}
+
   if (!ticket) {
     return <p className="text-center mt-10">Loading ticket...</p>;
   }
