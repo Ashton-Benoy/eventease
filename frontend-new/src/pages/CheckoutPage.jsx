@@ -86,11 +86,12 @@ export default function CheckoutPage() {
       {error && <p className="text-red-500 mb-2">{error}</p>}
 
       <button
-        onClick={submit}
-        className="w-full bg-indigo-600 text-white p-2 rounded"
-      >
-        Confirm Ticket
-      </button>
+  type="button"
+  onClick={submit}
+  className="w-full bg-indigo-600 text-white p-2 rounded"
+>
+  Confirm Ticket
+</button>
     </div>
   );
 }
