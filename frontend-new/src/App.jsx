@@ -44,17 +44,18 @@ export default function App() {
         {/* Tools */}
         <Route path="/scanner" element={<ScannerPage />} />
 
-        {/* Admin */}
+          {/* Admin */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
-<Route
-  path="/admin/dashboard"
-  element={
-    <AdminRoute>
-      <AdminDashboard />
-    </AdminRoute>
-  }
-/>
+        <Route
+          path="/admin/dashboard"
+          element={
+           <AdminRoute>
+             <AdminDashboard />
+           </AdminRoute>
+          }
+       />
+
       
 
         {/* Optional admin dashboard shortcut */}
@@ -66,7 +67,10 @@ export default function App() {
             </AdminRoute>
           }
         />
+         {/* Fallback */}
+      <Route path="*" element={<h1>404 Not Found</h1>} />
       </Routes>
+      
     </div>
   );
 }
