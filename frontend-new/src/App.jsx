@@ -45,15 +45,17 @@ export default function App() {
         <Route path="/scanner" element={<ScannerPage />} />
 
         {/* Admin */}
-        <Route path="/admin-login" element={<AdminLoginPage />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+
+<Route
+  path="/admin/dashboard"
+  element={
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  }
+/>
+      
 
         {/* Optional admin dashboard shortcut */}
         <Route
