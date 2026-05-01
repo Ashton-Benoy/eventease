@@ -21,6 +21,12 @@ export default function CheckoutPage() {
 
       if (!res.ok) throw new Error(data.message);
 
+      localStorage.setItem("ticket", JSON.stringify({
+  name: name,
+  email: email,
+  eventId: id
+}));
+
       navigate(`/tickets/success/${data.ticket.id}`);
     } catch (err) {
       setError(err.message);
@@ -56,8 +62,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-localStorage.setItem("ticket", JSON.stringify({
-  name: formData.name,
-  email: formData.email,
-  eventId: event.id
-}));

@@ -8,6 +8,7 @@ let events = [
     title: "Tech Meetup",
     date: "Dec 15",
     location: "Bengaluru",
+    description: "A meetup for developers to connect and learn."
   },
 ];
 
