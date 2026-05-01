@@ -18,9 +18,13 @@ export default function CheckoutPage() {
       });
 
       const data = await res.json();
+      console.log("Submitting ticket...");
+console.log("Response:", res);
+console.log("Data:", data);
 
       if (!res.ok) throw new Error(data.message);
 
+      console.log("Saving ticket:", { name, email, eventId: id });
       localStorage.setItem("ticket", JSON.stringify({
   name: name,
   email: email,
