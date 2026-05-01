@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Container from "../components/Container";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import { getEvents } from "../services/apiService";
+import api from "../services/apiService";
 import { Link } from "react-router-dom";
 
 
