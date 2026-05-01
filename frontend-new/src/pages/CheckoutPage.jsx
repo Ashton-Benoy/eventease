@@ -8,12 +8,13 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  if (!name || !email) {
+  
+
+  const submit = async () => {
+    if (!name || !email) {
   setError("Please enter name and email");
   return;
 }
-
-  const submit = async () => {
     try {
       console.log("Submitting ticket...");
 
