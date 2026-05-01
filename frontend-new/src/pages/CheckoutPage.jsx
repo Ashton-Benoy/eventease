@@ -56,3 +56,8 @@ export default function CheckoutPage() {
     </div>
   );
 }
+localStorage.setItem("ticket", JSON.stringify({
+  name: formData.name,
+  email: formData.email,
+  eventId: event.id
+}));

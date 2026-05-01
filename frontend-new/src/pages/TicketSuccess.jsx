@@ -6,11 +6,10 @@ export default function TicketSuccess() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/events`)
-      .then(res => res.json())
-      .then(setTicket);
-  }, [id]);
+ useEffect(() => {
+  const savedTicket = JSON.parse(localStorage.getItem("ticket"));
+  setTicket(savedTicket);
+}, []);
 
   if (!ticket) {
     return <p className="text-center mt-10">Loading ticket...</p>;
