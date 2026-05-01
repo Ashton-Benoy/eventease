@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
         "admin",
         JSON.stringify({ role: "admin", email })
       );
-      navigate("/admin");
+      navigate("/admin/dashboard");
     } else {
       setError("Invalid admin credentials");
     }

@@ -26,4 +26,23 @@ router.get("/:id", (req, res) => {
   res.json(event);
 });
 
+router.post("/", (req, res) => {
+  const { title, date, location } = req.body;
+
+  const newEvent = {
+    id: Date.now().toString(),
+    title,
+    date,
+    location
+  };
+
+  events.push(newEvent);
+  res.json(newEvent);
+});
+
+router.delete("/:id", (req, res) => {
+  events = events.filter(e => e.id !== req.params.id);
+  res.json({ message: "Deleted successfully" });
+});
+
 export default router;

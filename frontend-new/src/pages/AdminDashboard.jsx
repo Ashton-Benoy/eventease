@@ -30,6 +30,7 @@ export default function AdminDashboard() {
   };
 
   const deleteEvent = async (id) => {
+    console.log("Calling:", `${import.meta.env.VITE_API_URL}/api/events`);
     await fetch(`${import.meta.env.VITE_API_URL}/api/events/${id}`, {
       method: "DELETE",
     });
