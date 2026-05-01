@@ -18,7 +18,9 @@ const Dashboard = () => {
       if (!user) return;
 
     
-      const res1 = await API.get("/auth/me");
+  const res1 = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`);
+const data1 = await res1.json();
+setProfile(data1.user);
       setProfile(res1.data.user);
 
       
