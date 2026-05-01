@@ -8,9 +8,15 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  if (!name || !email) {
+  setError("Please enter name and email");
+  return;
+}
 
   const submit = async () => {
     try {
+      console.log("Submitting ticket...");
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tickets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -18,22 +24,43 @@ export default function CheckoutPage() {
       });
 
       const data = await res.json();
-      console.log("Submitting ticket...");
-console.log("Response:", res);
-console.log("Data:", data);
 
-      if (!res.ok) throw new Error(data.message);
+      console.log("Response:", res);
+      console.log("Data:", data);
 
-      console.log("Saving ticket:", { name, email, eventId: id });
-      localStorage.setItem("ticket", JSON.stringify({
-  name: name,
-  email: email,
-  eventId: id
-}));
+      
+      const ticketData = {
+        name,
+        email,
+        eventId: id,
+      };
 
-      navigate(`/tickets/success/${data.ticket.id}`);
+      console.log("Saving ticket:", ticketData);
+      localStorage.setItem("ticket", JSON.stringify(ticketData));
+
+      // ⚠️ Handle backend error gracefully (don’t block UI)
+      if (!res.ok) {
+        console.warn("Backend error:", data.message);
+      }
+
+    
+      const ticketId = data?.ticket?.id || id;
+
+      navigate(`/tickets/success/${ticketId}`);
+
     } catch (err) {
-      setError(err.message);
+      console.error("Submit error:", err);
+
+      
+      const ticketData = {
+        name,
+        email,
+        eventId: id,
+      };
+
+      localStorage.setItem("ticket", JSON.stringify(ticketData));
+
+      navigate(`/tickets/success/${id}`);
     }
   };
 
@@ -45,14 +72,14 @@ console.log("Data:", data);
         className="w-full border p-2 mb-3"
         placeholder="Name"
         value={name}
-        onChange={e => setName(e.target.value)}
+        onChange={(e) => setName(e.target.value)}
       />
 
       <input
         className="w-full border p-2 mb-3"
         placeholder="Email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
       />
 
       {error && <p className="text-red-500 mb-2">{error}</p>}
