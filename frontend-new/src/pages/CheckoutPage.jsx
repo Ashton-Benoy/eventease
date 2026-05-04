@@ -2,23 +2,24 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function CheckoutPage() {
+  const API_URL = import.meta.env.VITE_API_URL;
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  
 
   const submit = async () => {
-    if (!name || !email) {
-  setError("Please enter name and email");
-  return;
-}
-    try {
-      console.log("Submitting ticket...");
+    setError("");
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/tickets`, {
+    if (!name || !email) {
+      setError("Please enter name and email.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/tickets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, eventId: id }),
@@ -26,72 +27,55 @@ export default function CheckoutPage() {
 
       const data = await res.json();
 
-      console.log("Response:", res);
-      console.log("Data:", data);
-
-      
-      const ticketData = {
-        name,
-        email,
-        eventId: id,
-      };
-
-      console.log("Saving ticket:", ticketData);
-      localStorage.setItem("ticket", JSON.stringify(ticketData));
-
-      // ⚠️ Handle backend error gracefully (don’t block UI)
       if (!res.ok) {
-        console.warn("Backend error:", data.message);
+        setError(data.message || "Could not create ticket.");
+        return;
       }
 
-    
-      const ticketId = data?.ticket?.id || id;
+      localStorage.setItem("ticket", JSON.stringify(data.ticket));
+      localStorage.setItem("userEmail", email);
 
-      navigate(`/tickets/success/${ticketId}`);
-
-    } catch (err) {
-      console.error("Submit error:", err);
-
-      
-      const ticketData = {
-        name,
-        email,
-        eventId: id,
-      };
-
-      localStorage.setItem("ticket", JSON.stringify(ticketData));
-
-      navigate(`/tickets/success/${id}`);
+      navigate(`/tickets/success/${data.ticket.id}`);
+    } catch {
+      setError("Could not connect to backend.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Buy Ticket</h2>
+    <div className="min-h-screen bg-slate-100 px-4 py-10">
+      <div className="mx-auto max-w-md rounded-lg bg-white p-6 shadow">
+        <h1 className="text-2xl font-bold">Buy Ticket</h1>
+        <p className="mt-1 mb-5 text-sm text-slate-600">
+          Enter your details to book this event.
+        </p>
 
-      <input
-        className="w-full border p-2 mb-3"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+        <label className="mb-1 block text-sm font-medium">Name</label>
+        <input
+          className="mb-3 w-full rounded border p-2"
+          placeholder="Your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-      <input
-        className="w-full border p-2 mb-3"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <label className="mb-1 block text-sm font-medium">Email</label>
+        <input
+          type="email"
+          className="mb-3 w-full rounded border p-2"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      {error && <p className="text-red-500 mb-2">{error}</p>}
+        {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      <button
-  type="button"
-  onClick={submit}
-  className="w-full bg-indigo-600 text-white p-2 rounded"
->
-  Confirm Ticket
-</button>
+        <button
+          type="button"
+          onClick={submit}
+          className="w-full rounded bg-indigo-600 p-2 font-medium text-white hover:bg-indigo-700"
+        >
+          Confirm Ticket
+        </button>
+      </div>
     </div>
   );
 }

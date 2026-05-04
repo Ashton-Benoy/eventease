@@ -1,13 +1,16 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+import mongoose from "mongoose";
 
-const RSVPSchema = new Schema({
-  event: { type: Schema.Types.ObjectId, ref: 'Event' },
-  name: String,
-  email: String,
-  status: { type: String, enum: ['pending','attending','not-attending'], default: 'pending' },
-  guests: Number,
-  createdAt: { type: Date, default: Date.now }
-});
+const rsvpSchema = new mongoose.Schema(
+  {
+    eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    status: {
+      type: String,
+      enum: ["going", "maybe", "not_going"],
+      default: "going",
+    },
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('RSVP', RSVPSchema);
+export default mongoose.model("RSVP", rsvpSchema);

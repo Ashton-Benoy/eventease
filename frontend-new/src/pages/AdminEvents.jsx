@@ -1,28 +1,58 @@
+import { useEffect, useState } from "react";
+
 export default function AdminEvents() {
-  const events = [
-    { id: 1, title: "Tech Meetup", date: "Dec 15" },
-    { id: 2, title: "Design Workshop", date: "Dec 18" },
-  ];
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [events, setEvents] = useState([]);
+
+  const loadEvents = async () => {
+    const res = await fetch(`${API_URL}/api/events`);
+    const data = await res.json();
+    setEvents(data);
+  };
+
+  const deleteEvent = async (id) => {
+    await fetch(`${API_URL}/api/events/${id}`, {
+      method: "DELETE",
+    });
+    loadEvents();
+  };
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
   return (
-    <div className="p-8 min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-      <h1 className="text-2xl font-bold mb-6">Manage Events</h1>
+    <div className="min-h-screen bg-slate-100 px-4 py-8">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="text-3xl font-bold">Manage Events</h1>
+        <p className="mt-1 text-slate-600">View and delete created events.</p>
 
-      <div className="space-y-4">
-        {events.map((e) => (
-          <div
-            key={e.id}
-            className="flex justify-between items-center p-4 rounded-lg border dark:border-slate-800 bg-white dark:bg-slate-900"
-          >
-            <div>
-              <h2 className="font-semibold">{e.title}</h2>
-              <p className="text-sm opacity-70">{e.date}</p>
+        <div className="mt-6 space-y-4">
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="flex flex-col gap-3 rounded-lg bg-white p-5 shadow sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <h2 className="font-semibold">{event.title}</h2>
+                <p className="text-sm text-slate-500">
+                  {event.date || "No date"} | {event.location}
+                </p>
+              </div>
+
+              <button
+                onClick={() => deleteEvent(event.id)}
+                className="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
             </div>
-            <button className="px-3 py-1 text-sm bg-red-600 text-white rounded">
-              Delete
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {events.length === 0 && (
+          <p className="mt-6 text-slate-500">No events found.</p>
+        )}
       </div>
     </div>
   );

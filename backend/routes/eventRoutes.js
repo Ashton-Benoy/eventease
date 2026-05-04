@@ -1,48 +1,64 @@
 import express from "express";
+import Event from "../models/Event.js";
 
 const router = express.Router();
 
-let events = [
-  {
-    id: "1",
-    title: "Tech Meetup",
-    date: "Dec 15",
-    location: "Bengaluru",
-    description: "A meetup for developers to connect and learn."
-  },
-];
-
-// GET ALL EVENTS
-router.get("/", (req, res) => {
-  res.json(events);
-});
-
-// GET EVENT BY ID
-router.get("/:id", (req, res) => {
-  const event = events.find(e => e.id === req.params.id);
-  if (!event) {
-    return res.status(404).json({ message: "Event not found" });
+router.get("/", async (_req, res, next) => {
+  try {
+    const events = await Event.find().sort({ startAt: 1, createdAt: -1 });
+    res.json(events);
+  } catch (error) {
+    next(error);
   }
-  res.json(event);
 });
 
-router.post("/", (req, res) => {
-  const { title, date, location } = req.body;
+router.get("/:id", async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
 
-  const newEvent = {
-    id: Date.now().toString(),
-    title,
-    date,
-    location
-  };
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
 
-  events.push(newEvent);
-  res.json(newEvent);
+    res.json(event);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.delete("/:id", (req, res) => {
-  events = events.filter(e => e.id !== req.params.id);
-  res.json({ message: "Deleted successfully" });
+router.post("/", async (req, res, next) => {
+  try {
+    const { title, date, location } = req.body;
+
+    if (!title || !location) {
+      return res
+        .status(400)
+        .json({ message: "Title and location are required" });
+    }
+
+    const event = await Event.create({
+      ...req.body,
+      date: date || "",
+    });
+
+    res.status(201).json(event);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const event = await Event.findByIdAndDelete(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.json({ message: "Deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;

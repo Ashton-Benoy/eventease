@@ -18,7 +18,7 @@ export default function Navbar() {
       <div className="flex gap-4 items-center">
         {admin && (
           <>
-            <Link to="/admin">Admin Panel</Link>
+            <Link to="/admin/dashboard">Admin Panel</Link>
             <button onClick={logout} className="text-red-500">Logout</button>
           </>
         )}

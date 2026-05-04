@@ -15,8 +15,8 @@ router.get("/check-admin", protect, adminOnly, (req, res) => {
 
 
 router.get("/", protect, adminOnly, async (req, res) => {
-  const users = await User.find().select("-password");
+  const users = await User.find().select("-password -passwordHash");
   res.json(users);
 });
 
-module.exports = router;
+export default router;

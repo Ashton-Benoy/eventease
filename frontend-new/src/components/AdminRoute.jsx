@@ -4,7 +4,7 @@ export default function AdminRoute({ children }) {
   const admin = JSON.parse(localStorage.getItem("admin"));
 
   if (!admin) {
-    return <Navigate to="/admin-login" />;
+    return <Navigate to="/admin/login" />;
   }
 
   return children;

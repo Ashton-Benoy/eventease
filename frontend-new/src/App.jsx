@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
 
-/* imports */
+import HomePage from "./pages/HomePage";
 import EventsPage from "./pages/EventsPage";
 import EventDetailPage from "./pages/EventDetailPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -11,51 +12,100 @@ import MyTicketsPage from "./pages/MyTicketsPage";
 import ScannerPage from "./pages/ScannerPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminEvents from "./pages/AdminEvents";
+import AdminTickets from "./pages/AdminTickets";
+import AdminAttendees from "./pages/AdminAttendees";
 import AdminRoute from "./components/AdminRoute";
+import Dashboard from "./pages/DashboardPage";
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/events" element={<EventsPage />} />
-      <Route path="/events/:id" element={<EventDetailPage />} />
-      <Route path="/checkout/:id" element={<CheckoutPage />} />
-      <Route path="/tickets/success/:id" element={<TicketSuccess />} />
+    <div className="min-h-screen bg-slate-50">
 
-      {/* Auth */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+      
+      <Navbar />
 
-      {/* User */}
-      <Route path="/my-tickets" element={<MyTicketsPage />} />
+      {/* Routes */}
+      <Routes>
 
-      {/* Tools */}
-      <Route path="/scanner" element={<ScannerPage />} />
+        {/* Public */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/:id" element={<EventDetailPage />} />
+        <Route path="/checkout/:id" element={<CheckoutPage />} />
+        <Route path="/tickets/success/:id" element={<TicketSuccess />} />
 
-      {/* Admin */}
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+        {/* Auth */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
 
-      <Route
-        path="/admin/dashboard"
-        element={
-          <AdminRoute>
-            <AdminDashboard />
-          </AdminRoute>
-        }
-      />
+        {/* User */}
+        <Route path="/my-tickets" element={<MyTicketsPage />} />
 
-      {/* Optional */}
-      <Route
-        path="/dashboard"
-        element={
-          <AdminRoute>
-            <AdminDashboard />
-          </AdminRoute>
-        }
-      />
+        {/* Tools */}
+        <Route path="/scanner" element={<ScannerPage />} />
 
-      {/* Fallback */}
-      <Route path="*" element={<h1>404 Not Found</h1>} />
-    </Routes>
+        {/* Admin */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/events"
+          element={
+            <AdminRoute>
+              <AdminEvents />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/tickets"
+          element={
+            <AdminRoute>
+              <AdminTickets />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/attendees"
+          element={
+            <AdminRoute>
+              <AdminAttendees />
+            </AdminRoute>
+          }
+        />
+
+        
+        <Route
+          path="/dashboard"
+          element={
+            <AdminRoute>
+              <Dashboard />
+            </AdminRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route path="*" element={<h1>404 Not Found</h1>} />
+
+      </Routes>
+    </div>
   );
 }

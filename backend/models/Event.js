@@ -1,22 +1,38 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+import mongoose from "mongoose";
 
-const TicketTypeSchema = new Schema({
-  name: String,
-  priceCents: Number,
-  quantity: Number,
-  sold: { type: Number, default: 0 }
-});
+const ticketTypeSchema = new mongoose.Schema(
+  {
+    name: { type: String, trim: true },
+    priceCents: { type: Number, default: 0 },
+    quantity: { type: Number, default: 0 },
+    sold: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
 
-const EventSchema = new Schema({
-  title: String,
-  description: String,
-  startAt: Date,
-  endAt: Date,
-  location: String,
-  organizer: { type: Schema.Types.ObjectId, ref: 'User' },
-  tickets: [TicketTypeSchema],
-  createdAt: { type: Date, default: Date.now }
-});
+const eventSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, trim: true },
+    description: { type: String, default: "" },
+    date: { type: String, default: "" },
+    startAt: Date,
+    endAt: Date,
+    location: { type: String, required: true, trim: true },
+    price: { type: Number, default: 0 },
+    organizer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    tickets: [ticketTypeSchema],
+  },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+      },
+    },
+  }
+);
 
-module.exports = mongoose.model('Event', EventSchema);
+export default mongoose.model("Event", eventSchema);

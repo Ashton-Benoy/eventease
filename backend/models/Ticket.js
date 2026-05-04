@@ -1,30 +1,28 @@
-router.post("/", async (req, res) => {
-  const { eventId, name, email } = req.body;
+import mongoose from "mongoose";
 
-  const ticketId = Date.now().toString();
+const ticketSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, lowercase: true, trim: true },
+    eventId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Event",
+      required: true,
+    },
+    checkedIn: { type: Boolean, default: false },
+    qrCode: { type: String, default: "" },
+  },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_doc, ret) => {
+        ret.id = ret._id.toString();
+        delete ret._id;
+      },
+    },
+  }
+);
 
-  const ticket = {
-    id: ticketId,
-    eventId,
-    name,
-    email,
-    checkedIn: false,
-    createdAt: new Date(),
-  };
-
- 
-  const qrData = JSON.stringify({
-    ticketId,
-    eventId,
-  });
-
-  const qrCode = await QRCode.toDataURL(qrData);
-
-  ticket.qrCode = qrCode;
-
-  tickets.push(ticket);
-
-  io.to(`event-${eventId}`).emit("attendee-added", ticket);
-
-  res.json(ticket);
-});
+export default mongoose.model("Ticket", ticketSchema);

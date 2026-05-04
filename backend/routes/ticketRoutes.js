@@ -1,45 +1,80 @@
 import express from "express";
+import QRCode from "qrcode";
+import Event from "../models/Event.js";
+import Ticket from "../models/Ticket.js";
 
 const router = express.Router();
 
+router.post("/", async (req, res, next) => {
+  try {
+    const { name, email, eventId } = req.body;
 
-const tickets = [];
+    if (!name || !email || !eventId) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
 
+    const event = await Event.findById(eventId);
 
-router.post("/", (req, res) => {
-  const { name, email, eventId } = req.body;
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
 
-  if (!name || !email || !eventId) {
-    return res.status(400).json({ message: "Missing fields" });
+    const ticket = await Ticket.create({ name, email, eventId });
+    const qrCode = await QRCode.toDataURL(
+      JSON.stringify({
+        ticketId: ticket.id,
+        eventId: event.id,
+      })
+    );
+
+    ticket.qrCode = qrCode;
+    await ticket.save();
+
+    res.status(201).json({ success: true, ticket });
+  } catch (error) {
+    next(error);
   }
-
-  const ticket = {
-    id: Date.now().toString(),
-    name,
-    email,
-    eventId,
-  };
-
-  tickets.push(ticket);
-  res.json({ success: true, ticket });
 });
 
+router.get("/user/:email", async (req, res, next) => {
+  try {
+    const userTickets = await Ticket.find({
+      email: req.params.email.toLowerCase(),
+    })
+      .populate("eventId")
+      .sort({ createdAt: -1 });
 
-router.get("/:id", (req, res) => {
-  const ticket = tickets.find(t => t.id === req.params.id);
-  if (!ticket) return res.status(404).json({ message: "Ticket not found" });
-  res.json(ticket);
+    res.json(userTickets);
+  } catch (error) {
+    next(error);
+  }
 });
 
+router.get("/:id", async (req, res, next) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id).populate("eventId");
 
-router.get("/user/:email", (req, res) => {
-  const userTickets = tickets.filter(
-    t => t.email === req.params.email
-  );
-  res.json(userTickets);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    res.json(ticket);
+  } catch (error) {
+    next(error);
+  }
 });
-router.get("/", (req, res) => {
-  res.json(tickets);
+
+router.get("/", async (req, res, next) => {
+  try {
+    const query = req.query.eventId ? { eventId: req.query.eventId } : {};
+    const tickets = await Ticket.find(query)
+      .populate("eventId")
+      .sort({ createdAt: -1 });
+
+    res.json(tickets);
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;
