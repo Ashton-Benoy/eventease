@@ -2,14 +2,32 @@ import { useEffect, useState } from "react";
 
 export default function AdminAttendees() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const adminToken = localStorage.getItem("adminToken");
   const [tickets, setTickets] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`${API_URL}/api/tickets`)
-      .then((res) => res.json())
-      .then((data) => setTickets(data))
-      .catch(() => setTickets([]));
-  }, []);
+    fetch(`${API_URL}/api/tickets`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || data.error || "Could not load attendees");
+        }
+
+        return data;
+      })
+      .then((data) => {
+        setTickets(Array.isArray(data) ? data : []);
+        setError("");
+      })
+      .catch((loadError) => {
+        setTickets([]);
+        setError(loadError.message);
+      });
+  }, [API_URL, adminToken]);
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-8">
@@ -18,6 +36,12 @@ export default function AdminAttendees() {
         <p className="mt-1 text-slate-600">
           Each booked ticket is counted as one attendee.
         </p>
+
+        {error && (
+          <p className="mt-4 rounded bg-red-50 p-3 text-sm text-red-700">
+            {error}. Please login as admin again.
+          </p>
+        )}
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {tickets.map((ticket) => (

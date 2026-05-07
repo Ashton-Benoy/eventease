@@ -1,9 +1,16 @@
 import { Navigate } from "react-router-dom";
 
 export default function AdminRoute({ children }) {
-  const admin = JSON.parse(localStorage.getItem("admin"));
+  let admin = null;
 
-  if (!admin) {
+  try {
+    admin = JSON.parse(localStorage.getItem("admin"));
+  } catch {
+    localStorage.removeItem("admin");
+    localStorage.removeItem("adminToken");
+  }
+
+  if (!admin || !localStorage.getItem("adminToken")) {
     return <Navigate to="/admin/login" />;
   }
 

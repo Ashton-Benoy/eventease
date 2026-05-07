@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const signToken = (user) =>
   jwt.sign(
     { id: user._id, email: user.email, role: user.role },
@@ -14,13 +16,15 @@ const publicUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  isActive: user.isActive,
+  inactiveReason: user.inactiveReason,
 });
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email = "", password = "" } = req.body;
 
-    if (!email || !password) {
+    if (!emailPattern.test(email) || !password) {
       return res.status(400).json({ error: "Email and password required" });
     }
 
@@ -30,6 +34,12 @@ export const login = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        error: user.inactiveReason || "Your account is inactive",
+      });
     }
 
     const passwordToCompare = user.password || user.passwordHash;
@@ -51,10 +61,16 @@ export const login = async (req, res, next) => {
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name = "", email = "", password = "" } = req.body;
 
-    if (!email || !password) {
+    if (!emailPattern.test(email) || !password) {
       return res.status(400).json({ error: "Email and password required" });
+    }
+
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters" });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -65,7 +81,7 @@ export const register = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
-      name,
+      name: name.trim(),
       email,
       password: hashedPassword,
     });
@@ -81,8 +97,16 @@ export const register = async (req, res, next) => {
 
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@eventease.com";
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (email !== "admin@eventease.com" || password !== "admin123") {
+  if (!adminPassword) {
+    return res.status(500).json({
+      error: "Admin password is not configured on the server",
+    });
+  }
+
+  if (email !== adminEmail || password !== adminPassword) {
     return res.status(401).json({ error: "Invalid admin credentials" });
   }
 

@@ -18,6 +18,8 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "organizer", "attendee", "user"],
       default: "user",
     },
+    isActive: { type: Boolean, default: true },
+    inactiveReason: { type: String, default: "" },
   },
   { timestamps: true }
 );

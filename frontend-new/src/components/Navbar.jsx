@@ -19,6 +19,9 @@ export default function Navbar() {
         {admin && (
           <>
             <Link to="/admin/dashboard">Admin Panel</Link>
+            <Link to="/admin/users">Users</Link>
+            <Link to="/admin/tickets">Tickets</Link>
+            <Link to="/admin/payments">Payments</Link>
             <button onClick={logout} className="text-red-500">Logout</button>
           </>
         )}

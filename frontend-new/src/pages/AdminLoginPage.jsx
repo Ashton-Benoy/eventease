@@ -2,42 +2,55 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminLoginPage() {
+  const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  
-    if (email === "admin@eventease.com" && password === "admin123") {
-      localStorage.setItem(
-        "admin",
-        JSON.stringify({ role: "admin", email })
-      );
+    try {
+      const res = await fetch(`${API_URL}/api/auth/admin-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Invalid admin credentials");
+        return;
+      }
+
+      localStorage.setItem("admin", JSON.stringify(data.admin));
+      localStorage.setItem("adminToken", data.token);
       navigate("/admin/dashboard");
-    } else {
-      setError("Invalid admin credentials");
+    } catch {
+      setError("Could not connect to backend");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white dark:bg-slate-800 p-6 rounded shadow w-96"
-      >
-        <h2 className="text-2xl font-bold mb-4 text-center">Admin Login</h2>
+    <div className="flex min-h-screen items-center justify-center bg-slate-100">
+      <form onSubmit={handleLogin} className="w-96 rounded bg-white p-6 shadow">
+        <h2 className="mb-4 text-center text-2xl font-bold">Admin Login</h2>
 
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {error && <p className="mb-2 text-red-500">{error}</p>}
 
         <input
           type="email"
           placeholder="Admin Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
+          className="mb-3 w-full rounded border p-2"
           required
         />
 
@@ -46,15 +59,16 @@ export default function AdminLoginPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-4 p-2 border rounded"
+          className="mb-4 w-full rounded border p-2"
           required
         />
 
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-2 rounded"
+          disabled={loading}
+          className="w-full rounded bg-indigo-600 py-2 text-white"
         >
-          Login as Admin
+          {loading ? "Logging in..." : "Login as Admin"}
         </button>
       </form>
     </div>

@@ -15,6 +15,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminEvents from "./pages/AdminEvents";
 import AdminTickets from "./pages/AdminTickets";
 import AdminAttendees from "./pages/AdminAttendees";
+import AdminUsers from "./pages/AdminUsers";
+import AdminPayments from "./pages/AdminPayments";
 import AdminRoute from "./components/AdminRoute";
 import Dashboard from "./pages/DashboardPage";
 
@@ -88,6 +90,24 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminAttendees />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/payments"
+          element={
+            <AdminRoute>
+              <AdminPayments />
             </AdminRoute>
           }
         />
